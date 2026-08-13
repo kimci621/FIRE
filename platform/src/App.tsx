@@ -10,11 +10,13 @@ import { DataSheet } from '@/components/data/DataSheet'
 import { StorageWarning } from '@/components/data/StorageWarning'
 import { AchievementModal } from '@/components/milestones/AchievementModal'
 import { useMilestoneCelebration } from '@/hooks/useMilestoneCelebration'
+import { useSyncInit } from '@/hooks/useSyncInit'
 
 export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dataOpen, setDataOpen] = useState(false)
   const celebration = useMilestoneCelebration()
+  useSyncInit()
 
   return (
     <div className="min-h-screen bg-background text-foreground">

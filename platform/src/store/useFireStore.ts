@@ -6,15 +6,43 @@ import { monthId, addMonths } from '../lib/finance/projection'
 import { requiredMonthlyDeposit } from '../lib/finance/annuity'
 import { STORAGE_KEY } from '../lib/storage/adapter'
 import { createLocalStorageAdapter } from '../lib/storage/localStorageAdapter'
+import { createSupabaseAdapter, type SupabaseAdapter } from '../lib/sync/supabaseAdapter'
+import { mergePull, diffPush } from '../lib/sync/merge'
 import { selectTargetCapital } from './selectors'
 
+export type SyncStatus = 'offline' | 'syncing' | 'synced' | 'error'
+
+export interface SyncState {
+  status: SyncStatus
+  email: string | null
+  error: string | null
+  lastSyncAt: string | null
+}
+
+let adapterSingleton: SupabaseAdapter | null | undefined
+
+export function getAdapter(): SupabaseAdapter | null {
+  if (adapterSingleton === undefined) {
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    adapterSingleton = url && anonKey ? createSupabaseAdapter(url, anonKey) : null
+  }
+  return adapterSingleton
+}
+
 export interface FireStoreState extends FireData {
+  sync: SyncState
   setProfile(patch: Partial<Profile>, now?: Date): void
   toggleMonthCompleted(id: string, now?: Date): void
   setMonthActual(id: string, value: number, now?: Date): void
   addUnlockedMilestone(key: string): void
   importData(data: FireData, now?: Date): void
   resetAll(now?: Date): void
+  setSync(patch: Partial<SyncState>): void
+  sendCode(email: string): Promise<void>
+  verifyCode(email: string, code: string): Promise<void>
+  signOut(): Promise<void>
+  syncNow(): Promise<void>
 }
 
 function regenerateMonths(profile: Profile, prevMonths: MonthEntry[], now: Date): MonthEntry[] {
@@ -62,10 +90,13 @@ function initialData(): FireData {
   return { profile, months: regenerateMonths(profile, [], new Date()), meta: DEFAULT_META }
 }
 
+const INITIAL_SYNC: SyncState = { status: 'offline', email: null, error: null, lastSyncAt: null }
+
 export const useFireStore = create<FireStoreState>()(
   persist(
     (set, get) => ({
       ...initialData(),
+      sync: INITIAL_SYNC,
       setProfile(patch, now = new Date()) {
         const profile = { ...get().profile, ...patch }
         const totalMonths = (profile.targetAge - profile.currentAge) * 12
@@ -116,6 +147,51 @@ export const useFireStore = create<FireStoreState>()(
           meta: { unlockedMilestones: [], lastModified: { profile: now.toISOString() } },
           months: regenerateMonths(DEFAULT_PROFILE, [], now),
         })
+      },
+      setSync(patch) {
+        set((state) => ({ sync: { ...state.sync, ...patch } }))
+      },
+      async sendCode(email) {
+        const adapter = getAdapter()
+        if (!adapter) {
+          set((s) => ({ sync: { ...s.sync, status: 'error', error: 'Supabase не настроен' } }))
+          return
+        }
+        const { error } = await adapter.signInWithOtp(email)
+        set((s) => ({ sync: { ...s.sync, email: error ? null : email, error: error ? error.message : null } }))
+      },
+      async verifyCode(email, code) {
+        const adapter = getAdapter()
+        if (!adapter) return
+        const { error } = await adapter.verifyOtp(email, code)
+        if (error) {
+          set((s) => ({ sync: { ...s.sync, status: 'error', error: error.message } }))
+          return
+        }
+        set((s) => ({ sync: { ...s.sync, status: 'synced', email, error: null } }))
+        await get().syncNow()
+      },
+      async signOut() {
+        const adapter = getAdapter()
+        await adapter?.signOut()
+        set(() => ({ sync: { status: 'offline', email: null, error: null, lastSyncAt: null } }))
+      },
+      async syncNow() {
+        const adapter = getAdapter()
+        if (!adapter) return
+        set((s) => ({ sync: { ...s.sync, status: 'syncing', error: null } }))
+        try {
+          const remote = await adapter.pullRows()
+          const merged = mergePull(get(), remote.profile, remote.months)
+          if (merged.pulled > 0) set({ profile: merged.data.profile, months: merged.data.months })
+          const diff = diffPush(get(), remote.profile, remote.months)
+          await adapter.pushRows(diff.profile, diff.months)
+          set((s) => ({ sync: { ...s.sync, status: 'synced', error: null, lastSyncAt: new Date().toISOString() } }))
+        } catch (e) {
+          set((s) => ({
+            sync: { ...s.sync, status: 'error', error: e instanceof Error ? e.message : 'Ошибка синхронизации' },
+          }))
+        }
       },
     }),
     {

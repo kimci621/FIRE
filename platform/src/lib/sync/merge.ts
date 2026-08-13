@@ -45,7 +45,7 @@ export function diffPush(
   remoteMonths: RemoteRow[],
 ): { profile?: Profile; months: MonthEntry[] } {
   const localNewer = (localTs: string | undefined, remoteTs: string | undefined) =>
-    Boolean(localTs) && (!remoteTs || localTs > remoteTs)
+    localTs !== undefined && (!remoteTs || localTs > remoteTs)
 
   const result: { profile?: Profile; months: MonthEntry[] } = { months: [] }
   if (localNewer(local.meta.lastModified?.profile, remoteProfile?.updatedAt)) {
