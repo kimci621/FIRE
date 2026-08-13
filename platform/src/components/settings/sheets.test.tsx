@@ -34,7 +34,7 @@ describe('SettingsSheet', () => {
 describe('DataSheet', () => {
   it('renders sync status and action buttons', () => {
     render(<DataSheet open onOpenChange={() => {}} />)
-    expect(screen.getByText('Offline Mode')).toBeInTheDocument()
+    expect(screen.getByText('Offline')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Экспорт JSON/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Импорт JSON/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Сбросить/ })).toBeInTheDocument()

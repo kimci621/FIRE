@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -8,7 +10,22 @@ import { downloadJson, parseImport } from '@/lib/exportImport'
 import type { FireData } from '@/lib/types'
 import { useFireStore } from '@/store/useFireStore'
 
+const STATUS_TEXT: Record<string, string> = {
+  offline: 'Offline',
+  syncing: 'Синхронизация…',
+  synced: 'Синхронизировано',
+  error: 'Ошибка синка',
+}
+
 export function DataSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const sync = useFireStore((s) => s.sync)
+  const sendCode = useFireStore((s) => s.sendCode)
+  const verifyCode = useFireStore((s) => s.verifyCode)
+  const signOut = useFireStore((s) => s.signOut)
+  const syncNow = useFireStore((s) => s.syncNow)
+  const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
+  const loggedIn = sync.status === 'synced' || sync.status === 'syncing'
   const fileRef = useRef<HTMLInputElement>(null)
   const parsedRef = useRef<FireData | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -55,11 +72,53 @@ export function DataSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
             <SheetTitle>Данные</SheetTitle>
           </SheetHeader>
           <div className="mt-4 space-y-4 pb-8">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Синхронизация</span>
-              <Badge variant="secondary">Offline Mode</Badge>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Синхронизация</span>
+                <Badge variant={sync.status === 'error' ? 'destructive' : 'secondary'}>
+                  {STATUS_TEXT[sync.status] ?? 'Offline'}
+                </Badge>
+              </div>
+              {sync.lastSyncAt && (
+                <p className="text-xs text-muted-foreground">
+                  Последняя синхронизация: {new Date(sync.lastSyncAt).toLocaleString('ru-RU')}
+                </p>
+              )}
+              {loggedIn ? (
+                <div className="space-y-2">
+                  <p className="text-sm">{sync.email}</p>
+                  <div className="flex gap-2">
+                    <Button className="flex-1" variant="outline" onClick={() => void syncNow()}>
+                      Синхронизировать
+                    </Button>
+                    <Button className="flex-1" variant="outline" onClick={() => void signOut()}>
+                      Выйти
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="sync-email">Email</Label>
+                  <Input id="sync-email" type="email" value={email} placeholder="you@example.com" onChange={(e) => setEmail(e.target.value)} />
+                  {sync.email && (
+                    <div className="space-y-2">
+                      <Label htmlFor="sync-code">Код из письма</Label>
+                      <Input id="sync-code" inputMode="numeric" value={code} placeholder="6 цифр" onChange={(e) => setCode(e.target.value)} />
+                      <Button className="w-full" onClick={() => void verifyCode(sync.email!, code)}>
+                        Войти
+                      </Button>
+                    </div>
+                  )}
+                  {!sync.email && (
+                    <Button className="w-full" onClick={() => void sendCode(email)}>
+                      Получить код
+                    </Button>
+                  )}
+                </div>
+              )}
+              {sync.error && <p className="text-xs text-rose-500">{sync.error}</p>}
+              <p className="text-xs text-muted-foreground">Локальные данные никуда не отправляются без входа.</p>
             </div>
-            <p className="text-xs text-muted-foreground">Supabase-синк появится в Фазе 2.</p>
             <Separator />
             <Button className="w-full" onClick={onExport}>
               Экспорт JSON

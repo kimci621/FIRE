@@ -146,6 +146,7 @@ export const useFireStore = create<FireStoreState>()(
           profile: DEFAULT_PROFILE,
           meta: { unlockedMilestones: [], lastModified: { profile: now.toISOString() } },
           months: regenerateMonths(DEFAULT_PROFILE, [], now),
+          sync: INITIAL_SYNC,
         })
       },
       setSync(patch) {
