@@ -141,7 +141,20 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
           </div>
           <div className="space-y-1.5">
             <Label>Тема</Label>
-            <p className="text-sm text-muted-foreground">Тёмная (по умолчанию). Светлая и системная — в Фазе 3.</p>
+            <div className="flex rounded-lg border p-0.5">
+              {(['dark', 'light', 'system'] as const).map((t) => (
+                <button
+                  key={t}
+                  className={cn(
+                    'flex-1 rounded-md px-2 py-1.5 text-sm transition-colors',
+                    profile.theme === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
+                  )}
+                  onClick={() => setProfile({ theme: t })}
+                >
+                  {t === 'dark' ? 'Тёмная' : t === 'light' ? 'Светлая' : 'Система'}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label>Уведомления</Label>

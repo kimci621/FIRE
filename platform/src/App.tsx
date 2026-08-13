@@ -12,6 +12,7 @@ import { AchievementModal } from '@/components/milestones/AchievementModal'
 import { useMilestoneCelebration } from '@/hooks/useMilestoneCelebration'
 import { useSyncInit } from '@/hooks/useSyncInit'
 import { useReminder } from '@/hooks/useReminder'
+import { useTheme } from '@/hooks/useTheme'
 
 export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -19,6 +20,7 @@ export default function App() {
   const celebration = useMilestoneCelebration()
   useSyncInit()
   useReminder()
+  useTheme()
 
   return (
     <div className="min-h-screen bg-background text-foreground">
