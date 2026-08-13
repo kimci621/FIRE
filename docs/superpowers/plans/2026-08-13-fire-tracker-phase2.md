@@ -1414,3 +1414,20 @@ Vercel автодеплой. Проверка: открыть прод-URL, «Д
 1. **Spec coverage:** Supabase схема (ТЗ 4.4) — Task 1; Auth email OTP (ТЗ 11.2) — Tasks 4–6; last-write-wins синк (ТЗ 4.4/11.2) — Tasks 2–5; статус в DataSheet (ТЗ 5.4) — Task 6; streak (ТЗ 5.1) — Task 7; уведомления (ТЗ 6) — Task 8; деплой (ТЗ 2/11) — Task 10.
 2. **Placeholder scan:** код приведён полностью; «РАЗРЕШАЮ»-изменений спеки нет (уведомления — «локальные напоминания о взносе» из ТЗ, Notification API).
 3. **Type consistency:** `FireMeta.lastModified`/`remindersEnabled` — опциональные, обратная совместимость с экспортом v1; `RemoteRow.updatedAt` в camelCase на границе адаптера, `updated_at` — только в SQL/строках таблиц; сигнатуры `sendCode/verifyCode/signOut/syncNow/setSync/toggleReminders` согласованы между store и UI.
+
+---
+
+## Исправления, внесённые при исполнении (2026-08-13)
+
+| # | Что | Причина |
+|---|-----|---------|
+| 1 | `vi.stubEnv` для VITE_* в тестах sync/DataSheet | Синглтон адаптера без env возвращает null |
+| 2 | `testAdapter` через типизированный вызов замоканной фабрики, не экспорт из мока | TS не видит экспорт из vi.mock-фабрики |
+| 3 | `resetAll` сбрасывает и `sync` | Протекало состояние «вошёл» между тестами |
+| 4 | `waitFor` для async sendCode в RTL-тесте | fireEvent не дожидается микрозадач |
+| 5 | Напоминания: день = настройка `meta.remindDay` (1–28), не константа 20 | Требование пользователя «ничего статичного» |
+| 6 | Убраны лишний `migrate` в persist и неиспользуемый параметр | tsc strict |
+| 7 | Пути импортов в `src/lib/*` — `./types` | Тесты лежат рядом с типами |
+| 8 | merge.ts: `localTs !== undefined` вместо `Boolean(localTs)` | TS-сужение в стрелочной функции |
+
+**Итоги верификации:** `make test` 90/90 · `make build` успешен · e2e 10/10 (Chromium + WebKit).

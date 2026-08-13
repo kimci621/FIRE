@@ -111,6 +111,17 @@ platform-architect ──→ ТЗ (docs/specs/) ──→ designer + developer (
 | WebKit: офлайн-reload падал internal error | В e2e `goto('/').catch()` вместо `reload()` |
 | RTL: DOM тёк между тестами | `afterEach(cleanup)` в setup.ts |
 
+### 2026-08-13: Реализация Фазы 2 (Supabase sync + streak + напоминания)
+
+| Проблема | Решение |
+|----------|---------|
+| DDL нельзя выполнить через REST-ключ | SQL-схема в `supabase/schema.sql`, пользователь запускает в SQL Editor один раз |
+| Auth без redirect-ссылок (PWA) | Email OTP: `signInWithOtp` → `verifyOtp` с 6-значным кодом |
+| Синк при офлайн-первом приложении | last-write-wins per-row по `updated_at`, локальные таймстемпы в `meta.lastModified` |
+| Секреты в репо | `.env` в gitignore; service_role не используется; anon key в Vercel env vars |
+| «Ничего статичного» (требование пользователя) | 10 валют, горизонт догонялок `catchUpMonths` (6–36) в профиле, день напоминания `remindDay` (1–28) в meta |
+| Singleton адаптера в тестах | `vi.stubEnv` + vi.mock модуля адаптера |
+
 ### 2026-08-13: Spec-Design
 
 | Проблема | Решение |
