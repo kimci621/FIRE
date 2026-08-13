@@ -44,8 +44,7 @@ export interface FireStoreState extends FireData {
   setSync(patch: Partial<SyncState>): void
   toggleReminders(): void
   setRemindDay(day: number): void
-  sendCode(email: string): Promise<void>
-  verifyCode(email: string, code: string): Promise<void>
+  loginWithPassword(email: string, password: string): Promise<void>
   signOut(): Promise<void>
   syncNow(): Promise<void>
 }
@@ -164,21 +163,28 @@ export const useFireStore = create<FireStoreState>()(
       setSync(patch) {
         set((state) => ({ sync: { ...state.sync, ...patch } }))
       },
-      async sendCode(email) {
+      async loginWithPassword(email, password) {
         const adapter = getAdapter()
         if (!adapter) {
           set((s) => ({ sync: { ...s.sync, status: 'error', error: 'Supabase не настроен' } }))
           return
         }
-        const { error } = await adapter.signInWithOtp(email)
-        set((s) => ({ sync: { ...s.sync, email: error ? null : email, error: error ? error.message : null } }))
-      },
-      async verifyCode(email, code) {
-        const adapter = getAdapter()
-        if (!adapter) return
-        const { error } = await adapter.verifyOtp(email, code)
-        if (error) {
-          set((s) => ({ sync: { ...s.sync, status: 'error', error: error.message } }))
+        const fail = (message: string) => set((s) => ({ sync: { ...s.sync, status: 'error', error: message } }))
+
+        const signInRes = await adapter.signIn(email, password)
+        if (!signInRes.error) {
+          set((s) => ({ sync: { ...s.sync, status: 'synced', email, error: null } }))
+          await get().syncNow()
+          return
+        }
+        // Пользователя нет — создаём (Confirm email выключен → сессия сразу)
+        const signUpRes = await adapter.signUp(email, password)
+        if (signUpRes.error) {
+          if (signUpRes.error.code === 'user_already_exists') {
+            fail('Неверный пароль')
+          } else {
+            fail(signUpRes.error.message)
+          }
           return
         }
         set((s) => ({ sync: { ...s.sync, status: 'synced', email, error: null } }))

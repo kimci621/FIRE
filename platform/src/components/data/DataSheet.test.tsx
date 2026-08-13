@@ -5,8 +5,8 @@ import { DataSheet } from './DataSheet'
 
 vi.mock('../../lib/sync/supabaseAdapter', () => {
   const adapter = {
-    signInWithOtp: vi.fn().mockResolvedValue({ error: null }),
-    verifyOtp: vi.fn().mockResolvedValue({ error: null }),
+    signUp: vi.fn().mockResolvedValue({ error: null }),
+    signIn: vi.fn().mockResolvedValue({ error: null }),
     signOut: vi.fn().mockResolvedValue({ error: null }),
     getSession: vi.fn().mockResolvedValue(null),
     onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
@@ -26,7 +26,8 @@ describe('DataSheet sync ui', () => {
   it('shows auth form when offline', () => {
     render(<DataSheet open onOpenChange={() => {}} />)
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Получить код/ })).toBeInTheDocument()
+    expect(screen.getByLabelText('Пароль')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Войти' })).toBeInTheDocument()
     expect(screen.getByText('Offline')).toBeInTheDocument()
   })
 
@@ -38,10 +39,11 @@ describe('DataSheet sync ui', () => {
     expect(screen.getByText('Синхронизировано')).toBeInTheDocument()
   })
 
-  it('sends code from email input', async () => {
+  it('logs in with email and password', async () => {
     render(<DataSheet open onOpenChange={() => {}} />)
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'a@b.c' } })
-    fireEvent.click(screen.getByRole('button', { name: /Получить код/ }))
-    await waitFor(() => expect(useFireStore.getState().sync.email).toBe('a@b.c'))
+    fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'secret123' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Войти' }))
+    await waitFor(() => expect(useFireStore.getState().sync.status).toBe('synced'))
   })
 })

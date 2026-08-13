@@ -33,7 +33,7 @@ FIRE Tracker — mobile-first Progressive Web App для отслеживани�
 | Storage-абстракция | Интерфейс `StorageAdapter` | Сейчас localStorage, в Фазе 2 — Supabase, без переделки UI |
 | PWA | vite-plugin-pwa (Workbox) | Manifest + service worker + offline из коробки |
 | Тесты | Vitest + React Testing Library, Playwright (смоук) | Юниты движка, скриншот-смоук приложения |
-| Sync (Фаза 2) | @supabase/supabase-js | Auth (email OTP) + PostgreSQL, local-first |
+| Sync (Фаза 2) | @supabase/supabase-js | Auth (email + пароль, без писем) + PostgreSQL, local-first |
 | Деплой | Vercel | HTTPS из коробки (нужен для service worker) |
 
 ## 3. Структура проекта
@@ -259,7 +259,8 @@ Import JSON (валидация схемы/версии, предпросмот�
    график → настройки → data drawer) → геймификация MVP (триггеры+confetti+модалка) → PWA →
    e2e-смоук → деплой на Vercel.
 2. **Фаза 2 — Sync и напоминания:** **забрать у пользователя доступы Supabase (URL, anon key,
-   service key для миграций)** → проект + SQL-схема (profiles, months, RLS) + Auth (email OTP) →
+   service key для миграций)** → проект + SQL-схема (profiles, months, RLS) + Auth (email + пароль,
+   «Confirm email» выключен — лимит писем на тарифе 2/час делает OTP непригодным) →
    SupabaseAdapter (last-write-wins, статус в data drawer) → streak-счётчик → локальные уведомления.
 3. **Фаза 3 — Полировка:** Hall of Badges, загрузка аватара, светлая/system тема, анимации,
    крайние состояния, перфоманс.

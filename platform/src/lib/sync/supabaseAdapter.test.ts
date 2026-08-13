@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const authMock = {
-  signInWithOtp: vi.fn(),
-  verifyOtp: vi.fn(),
+  signUp: vi.fn(),
+  signInWithPassword: vi.fn(),
   signOut: vi.fn(),
   getSession: vi.fn(),
   onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
@@ -24,14 +24,14 @@ beforeEach(() => {
 })
 
 describe('createSupabaseAdapter', () => {
-  it('sends otp and verifies code', async () => {
-    authMock.signInWithOtp.mockResolvedValue({ error: null })
-    authMock.verifyOtp.mockResolvedValue({ error: null })
+  it('signs up and signs in with password', async () => {
+    authMock.signUp.mockResolvedValue({ error: null })
+    authMock.signInWithPassword.mockResolvedValue({ error: null })
     const adapter = createSupabaseAdapter('https://x.supabase.co', 'key')
-    await adapter.signInWithOtp('a@b.c')
-    expect(authMock.signInWithOtp).toHaveBeenCalledWith({ email: 'a@b.c', options: { shouldCreateUser: true } })
-    await adapter.verifyOtp('a@b.c', '123456')
-    expect(authMock.verifyOtp).toHaveBeenCalledWith({ email: 'a@b.c', token: '123456', type: 'email' })
+    await adapter.signUp('a@b.c', 'secret123')
+    expect(authMock.signUp).toHaveBeenCalledWith({ email: 'a@b.c', password: 'secret123' })
+    await adapter.signIn('a@b.c', 'secret123')
+    expect(authMock.signInWithPassword).toHaveBeenCalledWith({ email: 'a@b.c', password: 'secret123' })
   })
 
   it('returns session state', async () => {

@@ -17,11 +17,11 @@ export function createSupabaseAdapter(url: string, anonKey: string) {
 
   return {
     client,
-    async signInWithOtp(email: string) {
-      return client.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })
+    async signUp(email: string, password: string) {
+      return client.auth.signUp({ email, password })
     },
-    async verifyOtp(email: string, code: string) {
-      return client.auth.verifyOtp({ email, token: code, type: 'email' })
+    async signIn(email: string, password: string) {
+      return client.auth.signInWithPassword({ email, password })
     },
     async signOut() {
       return client.auth.signOut()

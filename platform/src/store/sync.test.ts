@@ -5,8 +5,8 @@ import { monthId } from '../lib/finance/projection'
 
 vi.mock('../lib/sync/supabaseAdapter', () => {
   const adapter = {
-    signInWithOtp: vi.fn().mockResolvedValue({ error: null }),
-    verifyOtp: vi.fn().mockResolvedValue({ error: null }),
+    signUp: vi.fn().mockResolvedValue({ error: null }),
+    signIn: vi.fn().mockResolvedValue({ error: null }),
     signOut: vi.fn().mockResolvedValue({ error: null }),
     getSession: vi.fn().mockResolvedValue(null),
     onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
@@ -23,8 +23,8 @@ import { createSupabaseAdapter } from '../lib/sync/supabaseAdapter'
 
 // Фабрика замокана на уровне модуля и возвращает общий инстанс — получить его типизированно
 const testAdapter = createSupabaseAdapter('https://x.supabase.co', 'key') as unknown as {
-  signInWithOtp: ReturnType<typeof vi.fn>
-  verifyOtp: ReturnType<typeof vi.fn>
+  signUp: ReturnType<typeof vi.fn>
+  signIn: ReturnType<typeof vi.fn>
   signOut: ReturnType<typeof vi.fn>
   getSession: ReturnType<typeof vi.fn>
   onAuthStateChange: ReturnType<typeof vi.fn>
@@ -48,17 +48,25 @@ beforeEach(() => {
 })
 
 describe('sync actions', () => {
-  it('sendCode keeps pending email and verifies into online state', async () => {
-    await useFireStore.getState().sendCode('a@b.c')
+  it('loginWithPassword signs in and syncs', async () => {
+    await useFireStore.getState().loginWithPassword('a@b.c', 'secret123')
+    expect(useFireStore.getState().sync.status).toBe('synced')
     expect(useFireStore.getState().sync.email).toBe('a@b.c')
-    await useFireStore.getState().verifyCode('a@b.c', '123456')
+  })
+
+  it('loginWithPassword creates account when missing', async () => {
+    testAdapter.signIn.mockResolvedValueOnce({ error: { message: 'Invalid login credentials' } })
+    await useFireStore.getState().loginWithPassword('a@b.c', 'secret123')
+    expect(testAdapter.signUp).toHaveBeenCalledWith('a@b.c', 'secret123')
     expect(useFireStore.getState().sync.status).toBe('synced')
   })
 
-  it('verifyCode failure sets error', async () => {
-    ;testAdapter.verifyOtp.mockResolvedValueOnce({ error: { message: 'bad code' } })
-    await useFireStore.getState().verifyCode('a@b.c', '000000')
+  it('loginWithPassword fails on wrong password', async () => {
+    testAdapter.signIn.mockResolvedValueOnce({ error: { message: 'Invalid login credentials' } })
+    testAdapter.signUp.mockResolvedValueOnce({ error: { message: 'exists', code: 'user_already_exists' } })
+    await useFireStore.getState().loginWithPassword('a@b.c', 'wrong')
     expect(useFireStore.getState().sync.status).toBe('error')
+    expect(useFireStore.getState().sync.error).toBe('Неверный пароль')
   })
 
   it('syncNow pulls remote data and merges', async () => {

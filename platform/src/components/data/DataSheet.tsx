@@ -19,12 +19,11 @@ const STATUS_TEXT: Record<string, string> = {
 
 export function DataSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const sync = useFireStore((s) => s.sync)
-  const sendCode = useFireStore((s) => s.sendCode)
-  const verifyCode = useFireStore((s) => s.verifyCode)
+  const loginWithPassword = useFireStore((s) => s.loginWithPassword)
   const signOut = useFireStore((s) => s.signOut)
   const syncNow = useFireStore((s) => s.syncNow)
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
+  const [password, setPassword] = useState('')
   const [sending, setSending] = useState(false)
   const loggedIn = sync.status === 'synced' || sync.status === 'syncing'
   const fileRef = useRef<HTMLInputElement>(null)
@@ -101,30 +100,25 @@ export function DataSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                 <div className="space-y-2">
                   <Label htmlFor="sync-email">Email</Label>
                   <Input id="sync-email" type="email" value={email} placeholder="you@example.com" onChange={(e) => setEmail(e.target.value)} />
-                  {sync.email && (
-                    <div className="space-y-2">
-                      <Label htmlFor="sync-code">Код из письма</Label>
-                      <Input id="sync-code" inputMode="numeric" value={code} placeholder="6 цифр" onChange={(e) => setCode(e.target.value)} />
-                      <Button className="w-full" onClick={() => void verifyCode(sync.email!, code)}>
-                        Войти
-                      </Button>
-                    </div>
-                  )}
-                  {!sync.email && (
-                    <Button
-                      className="w-full"
-                      disabled={sending || !email.includes('@')}
-                      onClick={() => {
-                        setSending(true)
-                        void sendCode(email).finally(() => setSending(false))
-                      }}
-                    >
-                      {sending ? 'Отправка…' : 'Получить код'}
-                    </Button>
-                  )}
-                  {sync.email && !sending && (
-                    <p className="text-xs text-muted-foreground">Код отправлен на {sync.email}. Если письма нет — подождите минуту, лимит писем ограничен.</p>
-                  )}
+                  <Label htmlFor="sync-password">Пароль</Label>
+                  <Input
+                    id="sync-password"
+                    type="password"
+                    value={password}
+                    placeholder="Минимум 6 символов"
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <Button
+                    className="w-full"
+                    disabled={sending || !email.includes('@') || password.length < 6}
+                    onClick={() => {
+                      setSending(true)
+                      void loginWithPassword(email, password).finally(() => setSending(false))
+                    }}
+                  >
+                    {sending ? 'Вход…' : 'Войти'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">Аккаунт создаётся автоматически при первом входе. Пароль нужен тот же на других устройствах.</p>
                 </div>
               )}
               {sync.error && <p className="text-xs text-rose-500">{sync.error}</p>}
