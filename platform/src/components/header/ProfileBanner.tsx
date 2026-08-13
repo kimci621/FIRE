@@ -4,7 +4,7 @@ import { Slider } from '@/components/ui/slider'
 import { formatMoney } from '@/lib/finance/format'
 import { useFireStore } from '@/store/useFireStore'
 import { useFireData } from '@/hooks/useFireData'
-import { selectRequiredDeposit, selectTargetCapital } from '@/store/selectors'
+import { selectCurrentBalance, selectRequiredDeposit, selectTargetCapital } from '@/store/selectors'
 import { selectStreak } from '@/lib/streak'
 import { AnimatedMoney } from './AnimatedMoney'
 
@@ -17,6 +17,8 @@ export function ProfileBanner() {
   const targetCapital = selectTargetCapital(profile)
   const required = selectRequiredDeposit(profile)
   const streak = useMemo(() => selectStreak(data.months), [data.months])
+  const currentBalance = useMemo(() => selectCurrentBalance(data), [data])
+  const progressPct = targetCapital > 0 ? Math.round((currentBalance / targetCapital) * 100) : 0
 
   return (
     <section className="rounded-2xl border bg-card p-4 space-y-4">
@@ -36,13 +38,25 @@ export function ProfileBanner() {
           <div className="text-sm text-muted-foreground">🔥 {streak} мес. подряд</div>
         </div>
       </div>
-      <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-violet-500/10 p-4">
-        <div className="text-sm text-muted-foreground">К целевому возрасту</div>
+      <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-violet-500/10 p-4 space-y-3">
+        <div>
+          <div className="text-sm text-muted-foreground">Накоплено сейчас</div>
+          <AnimatedMoney
+            value={formatMoney(currentBalance, profile.currency)}
+            className="text-2xl font-semibold tabular-nums tracking-tight"
+          />
+        </div>
+        <div>
+          <div className="text-sm text-muted-foreground">
+            К целевому возрасту{' '}
+            <span className="text-muted-foreground/70 tabular-nums">· {progressPct}% пути</span>
+          </div>
         <AnimatedMoney
           value={formatMoney(targetCapital, profile.currency)}
           className="text-3xl font-bold tabular-nums tracking-tight"
         />
-        <div className="mt-2 text-sm text-muted-foreground">
+        </div>
+        <div className="text-sm text-muted-foreground">
           Базовый взнос:{' '}
           <span className="font-medium text-foreground">{formatMoney(required, profile.currency)}/мес</span>
         </div>

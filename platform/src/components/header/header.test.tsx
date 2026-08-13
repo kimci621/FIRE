@@ -24,6 +24,8 @@ describe('ProfileBanner', () => {
     render(<ProfileBanner />)
     expect(screen.getByText('Амир')).toBeInTheDocument()
     expect(screen.getByText('К целевому возрасту')).toBeInTheDocument()
+    expect(screen.getByText('Накоплено сейчас')).toBeInTheDocument()
+    expect(screen.getByText(/пути/)).toBeInTheDocument()
     expect(screen.getByText(/Изъятие после 50 лет/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '2%' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '4%' })).toBeInTheDocument()
