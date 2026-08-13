@@ -71,7 +71,7 @@ export function DataSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
           <SheetHeader>
             <SheetTitle>Данные</SheetTitle>
           </SheetHeader>
-          <div className="mt-4 space-y-4 pb-8">
+          <div className="mt-4 space-y-4 px-4 pb-8">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Синхронизация</span>

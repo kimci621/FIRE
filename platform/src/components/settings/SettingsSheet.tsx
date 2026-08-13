@@ -69,7 +69,7 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
         <SheetHeader>
           <SheetTitle>Настройки</SheetTitle>
         </SheetHeader>
-        <div className="mt-4 space-y-4 pb-8">
+        <div className="mt-4 space-y-4 px-4 pb-8">
           <Field label="Имя" htmlFor="profile-name">
             <Input id="profile-name" value={profile.name} onChange={(e) => setProfile({ name: e.target.value })} />
           </Field>
