@@ -10,7 +10,7 @@ import { selectTargetCapital } from './selectors'
 
 export interface FireStoreState extends FireData {
   setProfile(patch: Partial<Profile>, now?: Date): void
-  toggleMonthCompleted(id: string): void
+  toggleMonthCompleted(id: string, now?: Date): void
   setMonthActual(id: string, value: number, now?: Date): void
   addUnlockedMilestone(key: string): void
   importData(data: FireData, now?: Date): void
@@ -45,6 +45,18 @@ function regenerateMonths(profile: Profile, prevMonths: MonthEntry[], now: Date)
   return months
 }
 
+function bumpProfile(meta: FireMeta, now: Date): FireMeta {
+  return { ...meta, lastModified: { ...meta.lastModified, profile: now.toISOString() } }
+}
+
+function bumpMonth(meta: FireMeta, id: string, now: Date): FireMeta {
+  return { ...meta, lastModified: { ...meta.lastModified, months: { ...meta.lastModified?.months, [id]: now.toISOString() } } }
+}
+
+function clearMonthTimestamps(meta: FireMeta): FireMeta {
+  return { ...meta, lastModified: { ...meta.lastModified, months: undefined } }
+}
+
 function initialData(): FireData {
   const profile = DEFAULT_PROFILE
   return { profile, months: regenerateMonths(profile, [], new Date()), meta: DEFAULT_META }
@@ -57,9 +69,13 @@ export const useFireStore = create<FireStoreState>()(
       setProfile(patch, now = new Date()) {
         const profile = { ...get().profile, ...patch }
         const totalMonths = (profile.targetAge - profile.currentAge) * 12
-        set({ profile, months: totalMonths > 0 ? regenerateMonths(profile, get().months, now) : get().months })
+        set({
+          profile,
+          months: totalMonths > 0 ? regenerateMonths(profile, get().months, now) : get().months,
+          meta: bumpProfile(get().meta, now),
+        })
       },
-      toggleMonthCompleted(id) {
+      toggleMonthCompleted(id, now = new Date()) {
         set((state) => ({
           months: state.months.map((m) =>
             m.id === id
@@ -70,12 +86,14 @@ export const useFireStore = create<FireStoreState>()(
                 }
               : m,
           ),
+          meta: bumpMonth(state.meta, id, now),
         }))
       },
-      setMonthActual(id, value, _now = new Date()) {
+      setMonthActual(id, value, now = new Date()) {
         const clamped = Number.isFinite(value) && value >= 0 ? value : 0
         set((state) => ({
           months: state.months.map((m) => (m.id === id ? { ...m, actualDeposit: clamped } : m)),
+          meta: bumpMonth(state.meta, id, now),
         }))
       },
       addUnlockedMilestone(key) {
@@ -86,10 +104,18 @@ export const useFireStore = create<FireStoreState>()(
         })
       },
       importData(data, now = new Date()) {
-        set({ profile: data.profile, meta: data.meta, months: regenerateMonths(data.profile, data.months, now) })
+        set({
+          profile: data.profile,
+          meta: clearMonthTimestamps({ ...data.meta, lastModified: { profile: now.toISOString() } }),
+          months: regenerateMonths(data.profile, data.months, now),
+        })
       },
       resetAll(now = new Date()) {
-        set({ profile: DEFAULT_PROFILE, meta: DEFAULT_META, months: regenerateMonths(DEFAULT_PROFILE, [], now) })
+        set({
+          profile: DEFAULT_PROFILE,
+          meta: { unlockedMilestones: [], lastModified: { profile: now.toISOString() } },
+          months: regenerateMonths(DEFAULT_PROFILE, [], now),
+        })
       },
     }),
     {

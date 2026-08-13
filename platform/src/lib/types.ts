@@ -36,6 +36,11 @@ export interface MonthEntry {
 
 export interface FireMeta {
   unlockedMilestones: string[]
+  /** Локальные таймстемпы изменений (ISO). Используются для last-write-wins синка. */
+  lastModified?: {
+    profile?: string
+    months?: Record<string, string>
+  }
 }
 
 export interface FireData {
