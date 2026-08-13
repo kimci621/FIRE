@@ -1,23 +1,63 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFireData } from '@/hooks/useFireData'
 import { selectYearGroups } from '@/store/selectors'
-import { YearSection } from './YearSection'
 import { Hint } from '@/components/ui/hint'
+import { monthId } from '@/lib/finance/projection'
+import { MonthRow } from './MonthRow'
 
 export function Calendar() {
   const data = useFireData()
   const groups = useMemo(() => selectYearGroups(data), [data])
-  const currentYear = new Date().getFullYear()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const currentId = monthId(new Date().getFullYear(), new Date().getMonth() + 1)
+
+  // при открытии сайта — активный месяц по центру контейнера
+  useEffect(() => {
+    const container = containerRef.current
+    const row = container?.querySelector<HTMLElement>(`[data-month-id="${currentId}"]`)
+    if (container && row) {
+      container.scrollTop = row.offsetTop - container.clientHeight / 2 + row.clientHeight / 2
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const items = useMemo(
+    () =>
+      groups.flatMap((g) => [
+        { type: 'header' as const, key: `y-${g.year}`, year: g.year, age: g.age },
+        ...g.entries.map((e) => ({ type: 'month' as const, key: e.point.id, point: e.point, entry: e.entry })),
+      ]),
+    [groups],
+  )
 
   return (
     <section className="space-y-2">
       <h2 className="flex items-center gap-1 px-1 font-semibold">
         План взносов
-        <Hint text="План будущих месяцев пересчитывается при изменении параметров; у прошедших сохраняется план, действовавший на тот момент. Факт — сколько реально внесли. Итог месяца — баланс портфеля на его конец." />
+        <Hint text="Тап по кружку — отметить пополнение (с салютом). Тап по строке — раскрыть детали: фактический взнос, план, итог месяца. Раскрытие не сдвигает список. Активный месяц — по центру." />
       </h2>
-      {groups.map((g) => (
-        <YearSection key={g.year} group={g} defaultOpen={g.year === currentYear} />
-      ))}
+      <div ref={containerRef} className="no-scrollbar relative h-80 overflow-y-auto rounded-2xl border bg-card p-2">
+        {items.map((item) =>
+          item.type === 'header' ? (
+            <div
+              key={item.key}
+              className="sticky top-0 z-10 -mx-2 mb-1 bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur"
+            >
+              {item.year} — {item.age} лет
+            </div>
+          ) : (
+            <MonthRow
+              key={item.key}
+              point={item.point}
+              entry={item.entry}
+              expanded={selectedId === item.point.id}
+              onSelect={() => setSelectedId(selectedId === item.point.id ? null : item.point.id)}
+              onClose={() => setSelectedId(null)}
+            />
+          ),
+        )}
+      </div>
     </section>
   )
 }

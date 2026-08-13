@@ -34,8 +34,8 @@ export default function App() {
         <StorageWarning />
         <CatchUpBanner />
         <PortfolioChart />
-        <InvestTips />
         <Calendar />
+        <InvestTips />
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={() => setBadgesOpen(true)}>
             <Trophy className="mr-2 h-4 w-4" />

@@ -1,7 +1,11 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { useFireStore } from '../../store/useFireStore'
+import { Calendar } from './Calendar'
+import { MONTH_NAMES, MonthRow } from './MonthRow'
 import type { ProjectionPoint, MonthEntry } from '../../lib/types'
-import { MonthCard } from './MonthCard'
+
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
 
 const point: ProjectionPoint = {
   id: '2026-01',
@@ -19,25 +23,53 @@ const entry: MonthEntry = {
   year: 2026,
   month: 1,
   age: 28,
-  plannedDeposit: 1000,
-  actualDeposit: 1000,
+  plannedDeposit: 1714,
+  actualDeposit: 1714,
   isCompleted: true,
 }
 
-describe('MonthCard', () => {
-  it('renders completed state with check', () => {
-    render(<MonthCard point={point} entry={entry} onToggle={vi.fn()} onActual={vi.fn()} currency="USD" />)
-    expect(screen.getByText('Янв 2026')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Снять отметку' })).toBeInTheDocument()
+beforeEach(() => {
+  useFireStore.getState().resetAll()
+})
+
+describe('Calendar', () => {
+  it('renders scroll container with month rows and year headers', () => {
+    render(<Calendar />)
+    const currentYear = new Date().getFullYear()
+    const headers = screen.getAllByText(/лет/)
+    expect(headers.length).toBeGreaterThan(0)
+    expect(headers[0].textContent).toContain(String(currentYear))
+    expect(document.querySelector('.no-scrollbar')).not.toBeNull()
   })
 
-  it('calls onToggle on click and onActual on input change', () => {
-    const onToggle = vi.fn()
-    const onActual = vi.fn()
-    render(<MonthCard point={point} entry={entry} onToggle={onToggle} onActual={onActual} currency="USD" />)
+  it('marks current month with data attribute for centering', () => {
+    render(<Calendar />)
+    const now = new Date()
+    const id = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    expect(document.querySelector(`[data-month-id="${id}"]`)).not.toBeNull()
+  })
+})
+
+describe('MonthRow', () => {
+  it('expands panel with actual input without shifting list', () => {
+    render(<MonthRow point={point} entry={entry} expanded onSelect={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByLabelText('Фактический взнос')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Готово' })).toBeInTheDocument()
+    expect(screen.getByText('Итог портфеля на конец месяца')).toBeInTheDocument()
+  })
+
+  it('toggles month via circle button', () => {
+    useFireStore.getState().setMonthActual('2026-01', 0)
+    useFireStore.getState().toggleMonthCompleted('2026-01')
+    expect(useFireStore.getState().months.find((m) => m.id === '2026-01')?.isCompleted).toBe(true)
+    render(<MonthRow point={point} entry={entry} expanded={false} onSelect={vi.fn()} onClose={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: 'Снять отметку' }))
-    expect(onToggle).toHaveBeenCalled()
-    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '1500' } })
-    expect(onActual).toHaveBeenCalledWith(1500)
+    expect(useFireStore.getState().months.find((m) => m.id === '2026-01')?.isCompleted).toBe(false)
+  })
+})
+
+describe('MONTH_NAMES', () => {
+  it('has 12 months', () => {
+    expect(MONTH_NAMES).toHaveLength(12)
   })
 })
