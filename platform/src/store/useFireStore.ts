@@ -39,6 +39,8 @@ export interface FireStoreState extends FireData {
   importData(data: FireData, now?: Date): void
   resetAll(now?: Date): void
   setSync(patch: Partial<SyncState>): void
+  toggleReminders(): void
+  setRemindDay(day: number): void
   sendCode(email: string): Promise<void>
   verifyCode(email: string, code: string): Promise<void>
   signOut(): Promise<void>
@@ -148,6 +150,13 @@ export const useFireStore = create<FireStoreState>()(
           months: regenerateMonths(DEFAULT_PROFILE, [], now),
           sync: INITIAL_SYNC,
         })
+      },
+      toggleReminders() {
+        set((state) => ({ meta: { ...state.meta, remindersEnabled: !(state.meta.remindersEnabled ?? true) } }))
+      },
+      setRemindDay(day) {
+        const clamped = Math.min(28, Math.max(1, Math.round(day)))
+        set((state) => ({ meta: { ...state.meta, remindDay: clamped } }))
       },
       setSync(patch) {
         set((state) => ({ sync: { ...state.sync, ...patch } }))

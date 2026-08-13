@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
@@ -22,6 +23,10 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor: string; c
 export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const profile = useFireStore((s) => s.profile)
   const setProfile = useFireStore((s) => s.setProfile)
+  const remindersEnabled = useFireStore((s) => s.meta.remindersEnabled ?? true)
+  const remindDay = useFireStore((s) => s.meta.remindDay ?? 20)
+  const toggleReminders = useFireStore((s) => s.toggleReminders)
+  const setRemindDay = useFireStore((s) => s.setRemindDay)
   const [error, setError] = useState<string | null>(null)
 
   const setNumber = (
@@ -137,6 +142,34 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
           <div className="space-y-1.5">
             <Label>Тема</Label>
             <p className="text-sm text-muted-foreground">Тёмная (по умолчанию). Светлая и системная — в Фазе 3.</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Уведомления</Label>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                if (remindersEnabled && 'Notification' in window) {
+                  void Notification.requestPermission()
+                }
+                toggleReminders()
+              }}
+            >
+              Напоминания о взносе: {remindersEnabled ? 'вкл' : 'выкл'}
+            </Button>
+            {remindersEnabled && (
+              <Field label="Напоминать с дня" htmlFor="remind-day">
+                <Input
+                  id="remind-day"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={28}
+                  value={remindDay}
+                  onChange={(e) => setRemindDay(Number(e.target.value))}
+                />
+              </Field>
+            )}
           </div>
           {error && <p className="text-sm text-rose-500">{error}</p>}
         </div>

@@ -41,6 +41,10 @@ export interface FireMeta {
     profile?: string
     months?: Record<string, string>
   }
+  /** Напоминания о взносе (локальные, Notification API). */
+  remindersEnabled?: boolean
+  /** День месяца, с которого напоминать (1-28). */
+  remindDay?: number
 }
 
 export interface FireData {
