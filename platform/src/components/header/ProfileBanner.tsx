@@ -86,6 +86,10 @@ export function ProfileBanner() {
           <span className="font-medium text-foreground">{formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес</span>{' '}
           · {profile.retirementYears} лет выплат
         </div>
+        <p className="text-xs text-muted-foreground/80">
+          Капитал продолжает инвестироваться под {profile.expectedRealYieldPct.toFixed(1)}% реальной доходности и
+          иссякает ровно к концу срока. Всё считается в сегодняшних деньгах — инфляция уже учтена.
+        </p>
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
