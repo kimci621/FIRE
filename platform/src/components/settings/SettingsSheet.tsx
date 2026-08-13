@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
 import type { Currency, Profile } from '@/lib/types'
+import { resizeImage } from '@/lib/avatar'
 import { useFireStore } from '@/store/useFireStore'
 
 const CURRENCIES: Currency[] = ['USD', 'EUR', 'RUB', 'GBP', 'CHF', 'CNY', 'JPY', 'KZT', 'AED', 'TRY']
@@ -28,6 +29,19 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
   const toggleReminders = useFireStore((s) => s.toggleReminders)
   const setRemindDay = useFireStore((s) => s.setRemindDay)
   const [error, setError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const onAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    try {
+      const dataUrl = await resizeImage(file)
+      setProfile({ avatar: { type: 'image', value: dataUrl } })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось загрузить фото')
+    }
+  }
 
   const setNumber = (
     field:
@@ -75,6 +89,19 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
           </Field>
           <div className="space-y-1.5">
             <Label>Аватар</Label>
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-primary/10 text-2xl">
+                {profile.avatar.type === 'image' ? (
+                  <img src={profile.avatar.value} alt="Аватар" className="h-full w-full object-cover" />
+                ) : (
+                  profile.avatar.value
+                )}
+              </div>
+              <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+                Загрузить фото
+              </Button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onAvatarFile} data-testid="avatar-file" />
+            </div>
             <div className="flex flex-wrap gap-2">
               {EMOJIS.map((e) => (
                 <button

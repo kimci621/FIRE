@@ -21,8 +21,12 @@ export function ProfileBanner() {
   return (
     <section className="rounded-2xl border bg-card p-4 space-y-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl">
-          {profile.avatar.value}
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-2xl">
+          {profile.avatar.type === 'image' ? (
+            <img src={profile.avatar.value} alt="Аватар" className="h-full w-full object-cover" />
+          ) : (
+            profile.avatar.value
+          )}
         </div>
         <div className="min-w-0">
           <div className="truncate text-lg font-semibold">{profile.name}</div>
