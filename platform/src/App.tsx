@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Database, Settings } from 'lucide-react'
+import { Database, Settings, Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProfileBanner } from '@/components/header/ProfileBanner'
 import { CatchUpBanner } from '@/components/header/CatchUpBanner'
@@ -9,6 +9,7 @@ import { SettingsSheet } from '@/components/settings/SettingsSheet'
 import { DataSheet } from '@/components/data/DataSheet'
 import { StorageWarning } from '@/components/data/StorageWarning'
 import { AchievementModal } from '@/components/milestones/AchievementModal'
+import { BadgesDialog } from '@/components/milestones/BadgesDialog'
 import { useMilestoneCelebration } from '@/hooks/useMilestoneCelebration'
 import { useSyncInit } from '@/hooks/useSyncInit'
 import { useReminder } from '@/hooks/useReminder'
@@ -17,6 +18,7 @@ import { useTheme } from '@/hooks/useTheme'
 export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dataOpen, setDataOpen] = useState(false)
+  const [badgesOpen, setBadgesOpen] = useState(false)
   const celebration = useMilestoneCelebration()
   useSyncInit()
   useReminder()
@@ -31,6 +33,10 @@ export default function App() {
         <PortfolioChart />
         <Calendar />
         <div className="flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={() => setBadgesOpen(true)}>
+            <Trophy className="mr-2 h-4 w-4" />
+            Достижения
+          </Button>
           <Button variant="outline" className="flex-1" onClick={() => setSettingsOpen(true)}>
             <Settings className="mr-2 h-4 w-4" />
             Настройки
@@ -42,6 +48,7 @@ export default function App() {
         </div>
       </div>
       <SettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <BadgesDialog open={badgesOpen} onOpenChange={setBadgesOpen} />
       <DataSheet open={dataOpen} onOpenChange={setDataOpen} />
       <AchievementModal celebration={celebration} />
     </div>
