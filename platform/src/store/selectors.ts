@@ -25,8 +25,12 @@ export function selectPoints(state: FireData, now: Date = new Date()): Projectio
   })
 }
 
-export function selectMaxBalance(state: FireData, now: Date = new Date()): number {
-  return selectPoints(state, now).reduce((max, p) => Math.max(max, p.balance), 0)
+/** Фактический баланс на текущий месяц (прошлые факты + стартовый капитал + проценты). */
+export function selectCurrentBalance(state: FireData, now: Date = new Date()): number {
+  const points = selectPoints(state, now)
+  if (points.length === 0) return 0
+  const index = Math.min(now.getMonth(), points.length - 1)
+  return points[index].balance
 }
 
 export function selectCatchUp(state: FireData, now: Date = new Date()): CatchUpResult | null {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useFireStore } from './useFireStore'
-import { selectPoints, selectRequiredDeposit, selectTargetCapital, selectCatchUp, selectMaxBalance, selectYearGroups } from './selectors'
+import { selectPoints, selectRequiredDeposit, selectTargetCapital, selectCatchUp, selectCurrentBalance, selectYearGroups } from './selectors'
 import { DEFAULT_PROFILE, type FireData, type MonthEntry } from '../lib/types'
 import { monthId } from '../lib/finance/projection'
 
@@ -41,9 +41,9 @@ describe('selectors', () => {
     expect(result?.shortfall).toBeCloseTo(600 + 5 * required, 5)
   })
 
-  it('computes max balance and year groups', () => {
+  it('computes current balance and year groups', () => {
     const state = useFireStore.getState()
-    expect(selectMaxBalance(state, NOW)).toBeGreaterThan(0)
+    expect(selectCurrentBalance(state, NOW)).toBeGreaterThan(0)
     const groups = selectYearGroups(state, NOW)
     expect(groups[0].year).toBe(2026)
     expect(groups[0].age).toBe(28)
