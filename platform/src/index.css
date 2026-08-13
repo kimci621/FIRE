@@ -92,4 +92,21 @@
     @apply bg-background text-foreground antialiased;
     overscroll-behavior-y: none;
   }
+  /* Курсоры по контексту: pointer на кликабельном, text на вводе */
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  [role='slider'],
+  [role='switch'],
+  select,
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+  input:not([type='range']):not([type='checkbox']):not([type='radio']):not([type='file']),
+  textarea {
+    cursor: text;
+  }
+  input[type='file'] {
+    cursor: pointer;
+  }
 }
