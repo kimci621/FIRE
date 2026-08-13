@@ -3104,3 +3104,22 @@ git commit -m "feat: corrupted storage warning with reset action"
 1. **Spec coverage:** все разделы ТЗ покрыты задачами. Стек (1–2, 13, 18, 19, 20), модель данных (3, 8, 9, 11), экраны (12–17, 21), поведение: reactive/snapshot (11), «догонялки» (6, 12), геймификация (10, 16), реальные/номинальные (13), валидация и предупреждение о валюте (15), повреждённое хранилище (21), PWA офлайн (18), импорт/экспорт (9, 15), критерии готовности (19, 20).
 2. **Placeholder scan:** пройден — весь код приведён полностью, «TBD» отсутствуют.
 3. **Type consistency:** сигнатуры `importData(data, now?)`, `setMonthActual(id, value, now?)`, `resetAll(now?)`, `selectPoints(state, now?)` согласованы между задачами; `MonthEntry`/`ProjectionPoint`/`YearGroup` совпадают с Task 3/11; импорт `monthId` из `lib/finance/projection` в тестах Task 16/19 соответствует его экспорту в Task 5.
+
+---
+
+## Исправления, внесённые при исполнении (2026-08-13)
+
+| # | Что | Причина |
+|---|-----|---------|
+| 1 | shadcn CLI 2026 сменил интерфейс (`-b` = библиотека, пресеты) | Компоненты ui/* созданы вручную (канонический new-york + radix); добавлена зависимость `tw-animate-css` |
+| 2 | `src/test/setup.ts` создан в Task 4, а не Task 8 | Vitest требует setup с первого запуска; добавлен `afterEach(cleanup)` (иначе DOM течёт между RTL-тестами) |
+| 3 | Константы PV/PMT: 954 387.4 / 1714.38 | Уточнены численно (node), в плане были ошибки округления |
+| 4 | Проекционные тесты: `interest` кумулятивный; у текущего месяца без записи — default-план | Ожидания в тестах были неверны, реализация соответствовала спеке |
+| 5 | Store-тесты: catchup учитывает созданные importData месяцы; toggle-тест на 2026-03 | Семантика импорта (полная регенерация сетки) |
+| 6 | Zustand v5: объектные селекторы → бесконечный ре-рендер | Добавлен хук `useFireData` (стабильные ссылки) + `useMemo` в CatchUpBanner/PortfolioChart/Calendar |
+| 7 | Recharts v3: `Tooltip formatter` — типы `ValueType | undefined` | Параметры без явных типов, `Number(v ?? 0)` |
+| 8 | Milestone-триггер: `selectMaxBalance` (макс. прогноза) → `selectCurrentBalance` (фактический текущий баланс) | Иначе конфетти на первом запуске за будущие проекции; соответствует духу брифа («total portfolio value») |
+| 9 | E2E offline: `page.reload()` → `page.goto('/').catch()` | WebKit кидает internal error при офлайн-перезагрузке |
+| 10 | Mobile-проект Playwright: установлен `webkit` | `devices['iPhone 13']` использует WebKit-движок |
+
+**Итоги верификации:** `make test` 55/55 · `make build` успешен · e2e 8/8 (Chromium + WebKit, включая офлайн) · DOM-проверка: целевой капитал 954K $, взнос 1 714 $/мес, тёмная тема, консоль чистая.

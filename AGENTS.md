@@ -101,6 +101,16 @@ platform-architect ──→ ТЗ (docs/specs/) ──→ designer + developer (
 | Раздутый scope (~15 фич в брифе) | Нарезали 3 фазы: MVP (ядро+PWA+милестоуны) → sync/уведомления → геймификация/темы |
 | Supabase не нужен в Фазе 1 | Архитектура за интерфейсом StorageAdapter: localStorage сейчас, Supabase в Фазе 2 |
 
+### 2026-08-13: Реализация Фазы 1 (MVP)
+
+| Проблема | Решение |
+|----------|---------|
+| shadcn CLI сменил интерфейс флагов | ui-компоненты написаны вручную (new-york + radix), `tw-animate-css` добавлен |
+| Zustand v5: селекторы-объекты дают бесконечный ре-рендер | Хук `useFireData` (подписка на стабильные ссылки) + `useMemo` для производных |
+| Конфетти срабатывало на первом запуске (за будущие проекции) | Milestone-триггер по `selectCurrentBalance` (фактический баланс), не по максимуму прогноза |
+| WebKit: офлайн-reload падал internal error | В e2e `goto('/').catch()` вместо `reload()` |
+| RTL: DOM тёк между тестами | `afterEach(cleanup)` в setup.ts |
+
 ### 2026-08-13: Spec-Design
 
 | Проблема | Решение |
