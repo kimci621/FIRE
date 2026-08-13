@@ -23,8 +23,11 @@ let adapterSingleton: SupabaseAdapter | null | undefined
 
 export function getAdapter(): SupabaseAdapter | null {
   if (adapterSingleton === undefined) {
-    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    const url =
+      (import.meta.env.VITE_SUPABASE_URL as string | undefined) ?? 'https://dyczemxbjfxgvlkqduoj.supabase.co'
+    const anonKey =
+      (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ??
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Y3plbXhiamZ4Z3Zsa3FkdW9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2MTk1MzQsImV4cCI6MjEwMjE5NTUzNH0.h-n2RPjfVRYgu4o9fPBqlPFw3SgJ3Lpf1RBV69lGWyU'
     adapterSingleton = url && anonKey ? createSupabaseAdapter(url, anonKey) : null
   }
   return adapterSingleton
