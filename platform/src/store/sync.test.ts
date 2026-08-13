@@ -66,7 +66,14 @@ describe('sync actions', () => {
     testAdapter.signUp.mockResolvedValueOnce({ error: { message: 'exists', code: 'user_already_exists' } })
     await useFireStore.getState().loginWithPassword('a@b.c', 'wrong')
     expect(useFireStore.getState().sync.status).toBe('error')
-    expect(useFireStore.getState().sync.error).toBe('Неверный пароль')
+    expect(useFireStore.getState().sync.error).toContain('Удалите')
+  })
+
+  it('loginWithPassword explains rate limit when confirm email is on', async () => {
+    testAdapter.signIn.mockResolvedValueOnce({ error: { message: 'Invalid login credentials' } })
+    testAdapter.signUp.mockResolvedValueOnce({ error: { message: 'limit', code: 'over_email_send_rate_limit' } })
+    await useFireStore.getState().loginWithPassword('a@b.c', 'secret123')
+    expect(useFireStore.getState().sync.error).toContain('Confirm email')
   })
 
   it('syncNow pulls remote data and merges', async () => {

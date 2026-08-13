@@ -177,11 +177,17 @@ export const useFireStore = create<FireStoreState>()(
           await get().syncNow()
           return
         }
+        if (signInRes.error.code === 'email_not_confirmed') {
+          fail('Почта не подтверждена. Удалите этого пользователя в Supabase (Authentication → Users) и войдите заново — аккаунт создастся с паролем.')
+          return
+        }
         // Пользователя нет — создаём (Confirm email выключен → сессия сразу)
         const signUpRes = await adapter.signUp(email, password)
         if (signUpRes.error) {
-          if (signUpRes.error.code === 'user_already_exists') {
-            fail('Неверный пароль')
+          if (signUpRes.error.code === 'over_email_send_rate_limit') {
+            fail('В Supabase включён «Confirm email»: выключите его (Authentication → Providers → Email), иначе вход упирается в лимит писем.')
+          } else if (signUpRes.error.code === 'user_already_exists') {
+            fail('Аккаунт уже существует (возможно, от старых OTP-попыток). Удалите его в Supabase (Authentication → Users) и войдите заново — аккаунт создастся с паролем.')
           } else {
             fail(signUpRes.error.message)
           }
