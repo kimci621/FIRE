@@ -130,6 +130,14 @@ platform-architect ──→ ТЗ (docs/specs/) ──→ designer + developer (
 | Лимит Supabase 2 OTP-письма/час, менять нельзя | Перешли на email+пароль: «Confirm email» выключен → ноль писем, мгновенный вход |
 | Повторные клики выжигали OTP-лимит | Кнопка входа блокируется на время запроса + валидация полей |
 
+### 2026-08-13: Фаза 3 (Badges, аватар, темы)
+
+| Проблема | Решение |
+|----------|---------|
+| Тема была зашита как тёмная | `resolveTheme` + `useTheme`: класс `.dark` на `<html>`, system через matchMedia, meta theme-color |
+| Фото-аватар раздует localStorage | Canvas-resize до 128×128 jpeg 0.85 перед сохранением в profile |
+| Прогресс ачивок | `selectCurrentBalance / threshold` с прогресс-барами в диалоге |
+
 ### 2026-08-13: Spec-Design
 
 | Проблема | Решение |

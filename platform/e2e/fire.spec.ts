@@ -36,6 +36,23 @@ test('export → reset → import roundtrip', async ({ page }) => {
   await expect(page.getByText('Амир')).toBeVisible()
 })
 
+test('theme switches to light', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Настройки' }).click()
+  await page.getByRole('button', { name: 'Светлая' }).click()
+  await expect(page.locator('html')).not.toHaveClass(/dark/)
+  await page.getByRole('button', { name: 'Тёмная' }).click()
+  await expect(page.locator('html')).toHaveClass(/dark/)
+})
+
+test('badges dialog lists achievements', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Достижения' }).click()
+  await expect(page.getByText('Зал достижений')).toBeVisible()
+  await expect(page.getByText('Первые полмиллиона!')).toBeVisible()
+  await expect(page.getByText('ФИНАЛ!')).toBeVisible()
+})
+
 test('app works offline via service worker', async ({ page, context }) => {
   await page.goto('/')
   await page.waitForFunction(() => navigator.serviceWorker?.controller !== null, null, { timeout: 15_000 })
