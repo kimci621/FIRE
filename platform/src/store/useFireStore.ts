@@ -20,6 +20,18 @@ export interface SyncState {
 }
 
 let adapterSingleton: SupabaseAdapter | null | undefined
+let syncTimer: ReturnType<typeof setTimeout> | null = null
+
+/** Дебаунс автосинка: при авторизованном состоянии любое изменение уезжает на сервер. */
+function scheduleAutoSync() {
+  const { sync } = useFireStore.getState()
+  if (sync.status !== 'synced') return
+  if (syncTimer) clearTimeout(syncTimer)
+  syncTimer = setTimeout(() => {
+    syncTimer = null
+    void useFireStore.getState().syncNow()
+  }, 2000)
+}
 
 export function getAdapter(): SupabaseAdapter | null {
   if (adapterSingleton === undefined) {
@@ -110,6 +122,7 @@ export const useFireStore = create<FireStoreState>()(
           months: totalMonths > 0 ? regenerateMonths(profile, get().months, now) : get().months,
           meta: bumpProfile(get().meta, now),
         })
+        scheduleAutoSync()
       },
       toggleMonthCompleted(id, now = new Date()) {
         set((state) => ({
@@ -125,6 +138,7 @@ export const useFireStore = create<FireStoreState>()(
           ),
           meta: bumpMonth(state.meta, id, now),
         }))
+        scheduleAutoSync()
       },
       setMonthActual(id, value, now = new Date()) {
         const clamped = Number.isFinite(value) && value >= 0 ? value : 0
@@ -132,6 +146,7 @@ export const useFireStore = create<FireStoreState>()(
           months: state.months.map((m) => (m.id === id ? { ...m, actualDeposit: clamped } : m)),
           meta: bumpMonth(state.meta, id, now),
         }))
+        scheduleAutoSync()
       },
       setMonthCustom(id, value, now = new Date()) {
         const custom = value !== undefined && Number.isFinite(value) && value >= 0 ? value : undefined
@@ -139,6 +154,7 @@ export const useFireStore = create<FireStoreState>()(
           months: state.months.map((m) => (m.id === id ? { ...m, customDeposit: custom } : m)),
           meta: bumpMonth(state.meta, id, now),
         }))
+        scheduleAutoSync()
       },
       addUnlockedMilestone(key) {
         set((state) => {
