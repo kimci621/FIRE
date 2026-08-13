@@ -11,6 +11,31 @@ import { Hint } from '@/components/ui/hint'
 
 const PRESETS = [2, 4, 6]
 
+function StatTile({
+  label,
+  hint,
+  value,
+  caption,
+}: {
+  label: string
+  hint?: string
+  value: string
+  caption?: string
+}) {
+  return (
+    <div className="min-w-0 rounded-lg border bg-background/60 p-3">
+      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <span className="truncate">{label}</span>
+        {hint && <Hint text={hint} />}
+      </div>
+      <div className="whitespace-nowrap text-base font-semibold leading-tight tabular-nums tracking-tight sm:text-lg">
+        {value}
+      </div>
+      {caption && <div className="text-xs text-muted-foreground">{caption}</div>}
+    </div>
+  )
+}
+
 export function ProfileBanner() {
   const profile = useFireStore((s) => s.profile)
   const setProfile = useFireStore((s) => s.setProfile)
