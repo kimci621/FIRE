@@ -47,6 +47,7 @@ export function ProfileBanner() {
   const progressPct = targetCapital > 0 ? Math.round((currentBalance / targetCapital) * 100) : 0
   const barPct = Math.min(100, progressPct)
   const remaining = Math.max(0, targetCapital - currentBalance)
+  const nominalTarget = targetCapital * Math.pow(1 + profile.inflationPct / 100, profile.targetAge - profile.currentAge)
 
   return (
     <section className="rounded-2xl border bg-card p-4 space-y-4">
@@ -85,7 +86,7 @@ export function ProfileBanner() {
             К целевому возрасту{' '}
             <span className="text-muted-foreground/70 tabular-nums">· {progressPct}% пути</span>
             <Hint
-              text={`Аннуитет: цель = доход × (1 − (1+r)^−N) / r, где r = (1+${profile.expectedRealYieldPct.toFixed(1)}%)^(1/12) − 1, N = ${profile.retirementYears}×12. Капитал, который при этой доходности позволит снимать ${formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес ${profile.retirementYears} лет и иссякнет ровно к концу срока.`}
+              text={`Аннуитет: цель = доход × (1 − (1+r)^−N) / r, где r = (1+${profile.expectedRealYieldPct.toFixed(1)}%)^(1/12) − 1, N = ${profile.retirementYears}×12. Капитал, который при этой доходности позволит снимать ${formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес ${profile.retirementYears} лет и иссякнет ровно к концу срока. В деньгах будущего при инфляции ${profile.inflationPct.toFixed(1)}%/год к ${profile.targetAge} годам это ≈ ${formatMoney(nominalTarget, profile.currency)} номинальных.`}
             />
           </div>
         <AnimatedMoney

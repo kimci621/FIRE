@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ProfileBanner } from '@/components/header/ProfileBanner'
 import { CatchUpBanner } from '@/components/header/CatchUpBanner'
 import { PortfolioChart } from '@/components/chart/PortfolioChart'
+import { InvestTips } from '@/components/invest/InvestTips'
 import { Calendar } from '@/components/calendar/Calendar'
 import { SettingsSheet } from '@/components/settings/SettingsSheet'
 import { DataSheet } from '@/components/data/DataSheet'
@@ -31,6 +32,7 @@ export default function App() {
         <StorageWarning />
         <CatchUpBanner />
         <PortfolioChart />
+        <InvestTips />
         <Calendar />
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={() => setBadgesOpen(true)}>
