@@ -1355,7 +1355,9 @@ describe('selectors', () => {
 
   it('computes catch-up from past months', () => {
     const result = selectCatchUp(useFireStore.getState(), NOW)
-    expect(result?.shortfall).toBeCloseTo(600, 5)
+    // Feb: 600 недобора + Mar..Jul созданы importData с планом required и фактом 0 (пропущены)
+    const required = selectRequiredDeposit(useFireStore.getState().profile)
+    expect(result?.shortfall).toBeCloseTo(600 + 5 * required, 5)
   })
 
   it('computes max balance and year groups', () => {
@@ -1380,11 +1382,11 @@ describe('actions', () => {
   })
 
   it('toggleMonthCompleted sets actual to planned when zero', () => {
-    useFireStore.getState().setMonthActual('2026-02', 0, NOW)
-    useFireStore.getState().toggleMonthCompleted('2026-02')
-    const m = useFireStore.getState().months.find((x) => x.id === '2026-02')
+    // 2026-03 создан importData: не completed, actual 0, planned = required
+    useFireStore.getState().toggleMonthCompleted('2026-03')
+    const m = useFireStore.getState().months.find((x) => x.id === '2026-03')
     expect(m?.isCompleted).toBe(true)
-    expect(m?.actualDeposit).toBe(1000)
+    expect(m?.actualDeposit).toBeCloseTo(selectRequiredDeposit(useFireStore.getState().profile), 5)
   })
 
   it('setMonthActual clamps negatives to zero', () => {
