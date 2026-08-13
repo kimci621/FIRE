@@ -66,8 +66,8 @@ export function PortfolioChart() {
               width={72}
             />
             <Tooltip
-              formatter={(v: number | string, name: string) => [
-                formatMoney(Number(v), profile.currency),
+              formatter={(v, name) => [
+                formatMoney(Number(v ?? 0), profile.currency),
                 name === 'contributions' ? 'Вклады' : 'Проценты',
               ]}
               labelFormatter={(_label, payload) => payload?.[0]?.payload?.id ?? ''}
