@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Database, Settings, Trophy } from 'lucide-react'
+import { Database, Settings, Trophy, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProfileBanner } from '@/components/header/ProfileBanner'
 import { CatchUpBanner } from '@/components/header/CatchUpBanner'
@@ -11,6 +11,7 @@ import { DataSheet } from '@/components/data/DataSheet'
 import { StorageWarning } from '@/components/data/StorageWarning'
 import { AchievementModal } from '@/components/milestones/AchievementModal'
 import { BadgesDialog } from '@/components/milestones/BadgesDialog'
+import { HelpDialog } from '@/components/help/HelpDialog'
 import { useMilestoneCelebration } from '@/hooks/useMilestoneCelebration'
 import { useSyncInit } from '@/hooks/useSyncInit'
 import { useReminder } from '@/hooks/useReminder'
@@ -20,6 +21,7 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dataOpen, setDataOpen] = useState(false)
   const [badgesOpen, setBadgesOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const celebration = useMilestoneCelebration()
   useSyncInit()
   useReminder()
@@ -48,9 +50,14 @@ export default function App() {
             Данные
           </Button>
         </div>
+        <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setHelpOpen(true)}>
+          <BookOpen className="mr-2 h-4 w-4" />
+          Как пользоваться приложением
+        </Button>
       </div>
       <SettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
       <BadgesDialog open={badgesOpen} onOpenChange={setBadgesOpen} />
+      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
       <DataSheet open={dataOpen} onOpenChange={setDataOpen} />
       <AchievementModal celebration={celebration} />
     </div>
