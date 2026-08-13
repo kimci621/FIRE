@@ -27,7 +27,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-md space-y-4 px-4 pb-16 pt-6">
+      <div className="mx-auto max-w-xl space-y-4 px-4 pb-16 pt-6">
         <ProfileBanner />
         <StorageWarning />
         <CatchUpBanner />
