@@ -8,6 +8,13 @@ test('first run shows defaults', async ({ page }) => {
   await expect(page.getByText('План взносов')).toBeVisible()
 })
 
+test('data sheet shows auth form', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Данные' }).click()
+  await expect(page.getByLabel('Email')).toBeVisible()
+  await expect(page.getByText('Offline')).toBeVisible()
+})
+
 test('marking current month as completed shows check state', async ({ page }) => {
   await page.goto('/')
   const toggle = page.getByRole('button', { name: 'Отметил пополнение' }).first()
