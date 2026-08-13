@@ -46,7 +46,8 @@ function isMonthEntry(m: unknown): m is MonthEntry {
     typeof o.month === 'number' &&
     typeof o.plannedDeposit === 'number' &&
     typeof o.actualDeposit === 'number' &&
-    typeof o.isCompleted === 'boolean'
+    typeof o.isCompleted === 'boolean' &&
+    (o.customDeposit === undefined || typeof o.customDeposit === 'number')
   )
 }
 

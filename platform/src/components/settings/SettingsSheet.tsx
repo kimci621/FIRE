@@ -157,7 +157,7 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
               <Input id="catchup-months" type="number" inputMode="numeric" value={profile.catchUpMonths} onChange={(e) => setNumber('catchUpMonths', e.target.value, 6)} />
             </Field>
           </div>
-          <Field label="Стартовый капитал" htmlFor="initial-capital">
+          <Field label="Капитал" htmlFor="initial-capital">
             <Input id="initial-capital" type="number" inputMode="decimal" value={profile.initialCapital} onChange={(e) => setNumber('initialCapital', e.target.value, 0)} />
           </Field>
           <Field

@@ -64,6 +64,12 @@ describe('projectMonths', () => {
     expect(points[1].interest).toBeCloseTo(points[0].interest + points[0].balance * r, 5)
   })
 
+  it('uses custom deposit for future months when set', () => {
+    const e: MonthEntry = { ...entry(2026, 9, 7777, 0, false), customDeposit: 50000 }
+    const points = projectMonths({ profile, entries: [e], startYear: 2026, currentMonthIndex: 7 })
+    expect(points[8].balance - points[7].balance).toBeCloseTo(50000, 5)
+  })
+
   it('uses planned deposit snapshot from entry for future months', () => {
     const e = entry(2026, 9, 7777, 0, false)
     const points = projectMonths({ profile, entries: [e], startYear: 2026, currentMonthIndex: 7 })

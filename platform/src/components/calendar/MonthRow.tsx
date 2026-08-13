@@ -23,6 +23,7 @@ export function MonthRow({ point, entry, expanded, onSelect, onClose }: MonthRow
   const currency = useFireStore((s) => s.profile.currency) as Currency
   const toggleMonthCompleted = useFireStore((s) => s.toggleMonthCompleted)
   const setMonthActual = useFireStore((s) => s.setMonthActual)
+  const setMonthCustom = useFireStore((s) => s.setMonthCustom)
   const rowRef = useRef<HTMLDivElement>(null)
   const [panelTop, setPanelTop] = useState(0)
 
@@ -68,7 +69,12 @@ export function MonthRow({ point, entry, expanded, onSelect, onClose }: MonthRow
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-2 text-xs tabular-nums text-muted-foreground">
-          <span>{formatMoneyCompact(point.isFuture ? (entry?.plannedDeposit ?? 0) : (entry?.actualDeposit ?? 0), currency)}</span>
+          <span>
+            {formatMoneyCompact(
+              point.isFuture ? (entry?.customDeposit ?? entry?.plannedDeposit ?? 0) : (entry?.actualDeposit ?? 0),
+              currency,
+            )}
+          </span>
           <span className="text-muted-foreground/60">{formatMoneyCompact(point.balance, currency)}</span>
         </div>
       </div>
@@ -103,10 +109,32 @@ export function MonthRow({ point, entry, expanded, onSelect, onClose }: MonthRow
               />
             </div>
           )}
+          {point.isFuture && (
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground" htmlFor={`custom-${point.id}`}>
+                Свой взнос на этот месяц (пусто = по плану)
+              </label>
+              <Input
+                id={`custom-${point.id}`}
+                type="number"
+                inputMode="decimal"
+                min={0}
+                value={entry?.customDeposit ?? ''}
+                placeholder={formatMoney(entry?.plannedDeposit ?? 0, currency)}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setMonthCustom(point.id, v === '' ? undefined : Number(v))
+                }}
+                className="h-9"
+              />
+            </div>
+          )}
           <div className="space-y-1 text-xs tabular-nums text-muted-foreground">
             <div className="flex justify-between">
-              <span>План</span>
-              <span>{formatMoney(entry?.plannedDeposit ?? 0, currency)}</span>
+              <span>{point.isFuture ? 'Взнос в прогнозе' : 'План'}</span>
+              <span>
+                {formatMoney(point.isFuture ? (entry?.customDeposit ?? entry?.plannedDeposit ?? 0) : (entry?.plannedDeposit ?? 0), currency)}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Итог портфеля на конец месяца</span>

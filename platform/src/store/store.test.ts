@@ -70,6 +70,13 @@ describe('actions', () => {
     expect(m?.actualDeposit).toBeCloseTo(selectRequiredDeposit(useFireStore.getState().profile), 5)
   })
 
+  it('setMonthCustom sets and clears custom deposit', () => {
+    useFireStore.getState().setMonthCustom('2027-01', 50000, NOW)
+    expect(useFireStore.getState().months.find((m) => m.id === '2027-01')?.customDeposit).toBe(50000)
+    useFireStore.getState().setMonthCustom('2027-01', undefined, NOW)
+    expect(useFireStore.getState().months.find((m) => m.id === '2027-01')?.customDeposit).toBeUndefined()
+  })
+
   it('setMonthActual clamps negatives to zero', () => {
     useFireStore.getState().setMonthActual('2026-01', -50, NOW)
     expect(useFireStore.getState().months[0].actualDeposit).toBe(0)

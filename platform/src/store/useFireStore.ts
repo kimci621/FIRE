@@ -38,6 +38,7 @@ export interface FireStoreState extends FireData {
   setProfile(patch: Partial<Profile>, now?: Date): void
   toggleMonthCompleted(id: string, now?: Date): void
   setMonthActual(id: string, value: number, now?: Date): void
+  setMonthCustom(id: string, value: number | undefined, now?: Date): void
   addUnlockedMilestone(key: string): void
   importData(data: FireData, now?: Date): void
   resetAll(now?: Date): void
@@ -117,7 +118,8 @@ export const useFireStore = create<FireStoreState>()(
               ? {
                   ...m,
                   isCompleted: !m.isCompleted,
-                  actualDeposit: !m.isCompleted && m.actualDeposit <= 0 ? m.plannedDeposit : m.actualDeposit,
+                  actualDeposit:
+                    !m.isCompleted && m.actualDeposit <= 0 ? (m.customDeposit ?? m.plannedDeposit) : m.actualDeposit,
                 }
               : m,
           ),
@@ -128,6 +130,13 @@ export const useFireStore = create<FireStoreState>()(
         const clamped = Number.isFinite(value) && value >= 0 ? value : 0
         set((state) => ({
           months: state.months.map((m) => (m.id === id ? { ...m, actualDeposit: clamped } : m)),
+          meta: bumpMonth(state.meta, id, now),
+        }))
+      },
+      setMonthCustom(id, value, now = new Date()) {
+        const custom = value !== undefined && Number.isFinite(value) && value >= 0 ? value : undefined
+        set((state) => ({
+          months: state.months.map((m) => (m.id === id ? { ...m, customDeposit: custom } : m)),
           meta: bumpMonth(state.meta, id, now),
         }))
       },

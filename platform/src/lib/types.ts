@@ -31,6 +31,8 @@ export interface MonthEntry {
   plannedDeposit: number
   actualDeposit: number
   isCompleted: boolean
+  /** Свой взнос вместо системного плана (для будущих месяцев). undefined = по плану. */
+  customDeposit?: number
   notes?: string
 }
 

@@ -37,11 +37,8 @@ export function projectMonths(input: ProjectionInput): ProjectionPoint[] {
     const entry = byId.get(id)
     const isFuture = i >= currentMonthIndex
     const earned = balance * r
-    const deposit = entry?.isCompleted
-      ? entry.actualDeposit
-      : isFuture
-        ? (entry?.plannedDeposit ?? defaultPlanned)
-        : 0
+    const plannedForMonth = entry?.customDeposit !== undefined ? entry.customDeposit : (entry?.plannedDeposit ?? defaultPlanned)
+    const deposit = entry?.isCompleted ? entry.actualDeposit : isFuture ? plannedForMonth : 0
     interest += earned
     balance += earned + deposit
     contributions += deposit

@@ -74,7 +74,7 @@ export function ProfileBanner() {
         <div>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             Накоплено сейчас
-            <Hint text="Стартовый капитал + фактические взносы + накопленные проценты на текущий месяц." />
+            <Hint text="Капитал + фактические взносы + накопленные проценты на текущий месяц." />
           </div>
           <AnimatedMoney
             value={formatMoney(currentBalance, profile.currency)}
@@ -97,7 +97,7 @@ export function ProfileBanner() {
         <div className="grid grid-cols-2 gap-2">
           <StatTile
             label="Базовый взнос"
-            hint={`PMT-формула: ежемесячный взнос, доводящий стартовый капитал ${formatMoney(profile.initialCapital, profile.currency)} до цели за ${(profile.targetAge - profile.currentAge) * 12} мес при ${profile.expectedRealYieldPct.toFixed(1)}% реальной доходности.`}
+            hint={`PMT-формула: ежемесячный взнос, доводящий капитал ${formatMoney(profile.initialCapital, profile.currency)} до цели за ${(profile.targetAge - profile.currentAge) * 12} мес при ${profile.expectedRealYieldPct.toFixed(1)}% реальной доходности.`}
             value={`${formatMoney(required, profile.currency)}/мес`}
             caption="пересчитывается live"
           />
@@ -113,7 +113,7 @@ export function ProfileBanner() {
             value={`${profile.targetAge - profile.currentAge} лет · ${(profile.targetAge - profile.currentAge) * 12} мес`}
           />
           <StatTile
-            label="Стартовый капитал"
+            label="Капитал"
             hint="Уже накопленная сумма на старте. Входит в «Накоплено сейчас» и уменьшает базовый взнос."
             value={formatMoney(profile.initialCapital, profile.currency)}
           />

@@ -68,6 +68,22 @@ describe('MonthRow', () => {
   })
 })
 
+describe('MonthRow custom deposit', () => {
+  const futurePoint: ProjectionPoint = { ...point, id: '2027-01', year: 2027, month: 1, isFuture: true }
+  const futureEntry: MonthEntry = { ...entry, id: '2027-01', year: 2027, month: 1, isCompleted: false, actualDeposit: 0 }
+
+  it('shows custom deposit input for future months', () => {
+    render(<MonthRow point={futurePoint} entry={futureEntry} expanded onSelect={vi.fn()} onClose={vi.fn()} />)
+    const input = screen.getByLabelText('Свой взнос на этот месяц (пусто = по плану)')
+    fireEvent.input(input, { target: { value: '50000' } })
+    expect(useFireStore.getState().months.find((m) => m.id === '2027-01')?.customDeposit).toBe(50000)
+    fireEvent.input(input, { target: { value: '0' } })
+    expect(useFireStore.getState().months.find((m) => m.id === '2027-01')?.customDeposit).toBe(0)
+    fireEvent.input(input, { target: { value: '' } })
+    expect(useFireStore.getState().months.find((m) => m.id === '2027-01')?.customDeposit).toBeUndefined()
+  })
+})
+
 describe('MONTH_NAMES', () => {
   it('has 12 months', () => {
     expect(MONTH_NAMES).toHaveLength(12)

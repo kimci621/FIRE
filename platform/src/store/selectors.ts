@@ -64,7 +64,7 @@ export function selectYearGroups(state: FireData, now: Date = new Date()): YearG
       groups.set(point.year, group)
     }
     group.entries.push({ point, entry })
-    group.plannedTotal += entry?.plannedDeposit ?? 0
+    group.plannedTotal += entry ? (entry.customDeposit ?? entry.plannedDeposit) : 0
     group.actualTotal += entry?.isCompleted ? entry.actualDeposit : 0
     group.endBalance = point.balance
   }
