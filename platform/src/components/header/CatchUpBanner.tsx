@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { formatMoney } from '@/lib/finance/format'
 import { useFireData } from '@/hooks/useFireData'
 import { selectCatchUp, selectRequiredDeposit } from '@/store/selectors'
+import { Hint } from '@/components/ui/hint'
 
 export function CatchUpBanner() {
   const data = useFireData()
@@ -19,6 +20,12 @@ export function CatchUpBanner() {
         следующих {catchUp.months} месяцев.
       </p>
       {extreme && <p className="text-muted-foreground">…или сдвиньте целевой возраст в настройках.</p>}
+      <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+        <Hint
+          text={`Недобор = Σ(план − факт) по прошедшим месяцам: ${formatMoney(catchUp.shortfall, profile.currency)}. Доп. взнос = S × r / (1 − (1+r)^−Y) при Y = ${catchUp.months} мес — распределение разрыва с учётом сложного процента, округление вверх до сотни.`}
+        />
+        Как считается «догонялки»
+      </div>
     </div>
   )
 }

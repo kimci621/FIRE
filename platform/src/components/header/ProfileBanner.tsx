@@ -7,6 +7,7 @@ import { useFireData } from '@/hooks/useFireData'
 import { selectCurrentBalance, selectRequiredDeposit, selectTargetCapital } from '@/store/selectors'
 import { selectStreak } from '@/lib/streak'
 import { AnimatedMoney } from './AnimatedMoney'
+import { Hint } from '@/components/ui/hint'
 
 const PRESETS = [2, 4, 6]
 
@@ -37,30 +38,42 @@ export function ProfileBanner() {
           <div className="text-sm text-muted-foreground">
             Путь к {profile.targetAge} годам · {profile.currency}
           </div>
-          <div className="text-sm text-muted-foreground">🔥 {streak} мес. подряд</div>
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            🔥 {streak} мес. подряд
+            <Hint text="Месяцы подряд с отмеченным пополнением." />
+          </div>
         </div>
       </div>
       <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-violet-500/10 p-4 space-y-3">
         <div>
-          <div className="text-sm text-muted-foreground">Накоплено сейчас</div>
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            Накоплено сейчас
+            <Hint text="Стартовый капитал + фактические взносы + накопленные проценты на текущий месяц." />
+          </div>
           <AnimatedMoney
             value={formatMoney(currentBalance, profile.currency)}
             className="text-2xl font-semibold tabular-nums tracking-tight"
           />
         </div>
         <div>
-          <div className="text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
             К целевому возрасту{' '}
             <span className="text-muted-foreground/70 tabular-nums">· {progressPct}% пути</span>
+            <Hint
+              text={`Аннуитет: цель = доход × (1 − (1+r)^−N) / r, где r = (1+${profile.expectedRealYieldPct.toFixed(1)}%)^(1/12) − 1, N = ${profile.retirementYears}×12. Капитал, который при этой доходности позволит снимать ${formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес ${profile.retirementYears} лет и иссякнет ровно к концу срока.`}
+            />
           </div>
         <AnimatedMoney
           value={formatMoney(targetCapital, profile.currency)}
           className="text-3xl font-bold tabular-nums tracking-tight"
         />
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-1 text-sm text-muted-foreground">
           Базовый взнос:{' '}
           <span className="font-medium text-foreground">{formatMoney(required, profile.currency)}/мес</span>
+          <Hint
+            text={`PMT-формула: ежемесячный взнос, доводящий стартовый капитал ${formatMoney(profile.initialCapital, profile.currency)} до цели за ${(profile.targetAge - profile.currentAge) * 12} мес при ${profile.expectedRealYieldPct.toFixed(1)}% реальной доходности. Пересчитывается при каждом изменении параметров.`}
+          />
         </div>
         <div className="space-y-1.5">
           <div
@@ -81,10 +94,11 @@ export function ProfileBanner() {
             <span>Осталось {formatMoney(remaining, profile.currency)}</span>
           </div>
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-1 text-sm text-muted-foreground">
           Изъятие после {profile.targetAge} лет:{' '}
           <span className="font-medium text-foreground">{formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес</span>{' '}
           · {profile.retirementYears} лет выплат
+          <Hint text="Сумма ежемесячного изъятия в сегодняшних деньгах. Капитал продолжает инвестироваться — проценты покрывают часть изъятий, поэтому суммы хватает на весь срок." />
         </div>
         <p className="text-xs text-muted-foreground/80">
           Капитал продолжает инвестироваться под {profile.expectedRealYieldPct.toFixed(1)}% реальной доходности и
@@ -93,7 +107,10 @@ export function ProfileBanner() {
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Реальная доходность</span>
+          <span className="flex items-center gap-1 text-muted-foreground">
+            Реальная доходность
+            <Hint text="Доходность СВЕРХ инфляции. Все расчёты — в сегодняшней покупательной способности, инфляция учтена по построению. Номинальный режим графика добавляет её сверху." />
+          </span>
           <span className="font-medium tabular-nums">{profile.expectedRealYieldPct.toFixed(1)}%</span>
         </div>
         <Slider

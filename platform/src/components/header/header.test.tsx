@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useFireStore } from '../../store/useFireStore'
 import type { FireData } from '../../lib/types'
 import { DEFAULT_PROFILE } from '../../lib/types'
@@ -32,6 +32,14 @@ describe('ProfileBanner', () => {
     expect(screen.getByRole('button', { name: '2%' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '4%' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '6%' })).toBeInTheDocument()
+  })
+})
+
+describe('hints', () => {
+  it('shows tooltip content on focus', async () => {
+    render(<ProfileBanner />)
+    fireEvent.focus(screen.getAllByRole('button', { name: 'Подробнее' })[0])
+    await waitFor(() => expect(screen.getByRole('tooltip')).toBeInTheDocument())
   })
 })
 

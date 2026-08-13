@@ -7,15 +7,19 @@ import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
 import type { Currency, Profile } from '@/lib/types'
 import { resizeImage } from '@/lib/avatar'
+import { Hint } from '@/components/ui/hint'
 import { useFireStore } from '@/store/useFireStore'
 
 const CURRENCIES: Currency[] = ['USD', 'EUR', 'RUB', 'GBP', 'CHF', 'CNY', 'JPY', 'KZT', 'AED', 'TRY']
 const EMOJIS = ['🚀', '💰', '📈', '🎯', '🔥', '💎']
 
-function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: ReactNode }) {
+function Field({ label, htmlFor, hint, children }: { label: string; htmlFor: string; hint?: string; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <div className="flex items-center gap-1">
+        <Label htmlFor={htmlFor}>{label}</Label>
+        {hint && <Hint text={hint} />}
+      </div>
       {children}
     </div>
   )
@@ -143,25 +147,32 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
             <Field label="Целевой возраст" htmlFor="target-age">
               <Input id="target-age" type="number" inputMode="numeric" value={profile.targetAge} onChange={(e) => setNumber('targetAge', e.target.value, 1)} />
             </Field>
-            <Field label="Срок выплат, лет" htmlFor="retirement-years">
+            <Field label="Срок выплат, лет" htmlFor="retirement-years" hint="Сколько лет планируются выплаты после целевого возраста.">
               <Input id="retirement-years" type="number" inputMode="numeric" value={profile.retirementYears} onChange={(e) => setNumber('retirementYears', e.target.value, 1)} />
             </Field>
-            <Field label="Инфляция, %" htmlFor="inflation">
+            <Field label="Инфляция, %" htmlFor="inflation" hint="Используется только в номинальном режиме графика: будущие суммы умножаются на (1+инфляция)^лет. Расчёты целей — всегда в реальных деньгах.">
               <Input id="inflation" type="number" inputMode="decimal" value={profile.inflationPct} onChange={(e) => setNumber('inflationPct', e.target.value, 0)} />
             </Field>
-            <Field label="Догонялки, мес" htmlFor="catchup-months">
+            <Field label="Догонялки, мес" htmlFor="catchup-months" hint="Горизонт закрытия недобора: на сколько месяцев распределяется дополнительный взнос (6–36).">
               <Input id="catchup-months" type="number" inputMode="numeric" value={profile.catchUpMonths} onChange={(e) => setNumber('catchUpMonths', e.target.value, 6)} />
             </Field>
           </div>
           <Field label="Стартовый капитал" htmlFor="initial-capital">
             <Input id="initial-capital" type="number" inputMode="decimal" value={profile.initialCapital} onChange={(e) => setNumber('initialCapital', e.target.value, 0)} />
           </Field>
-          <Field label="Целевой доход в месяц" htmlFor="target-income">
+          <Field
+            label="Целевой доход в месяц"
+            htmlFor="target-income"
+            hint="Желаемое ежемесячное изъятие после выхода на пенсию — в сегодняшних деньгах. От него считается целевой капитал."
+          >
             <Input id="target-income" type="number" inputMode="decimal" value={profile.targetMonthlyIncome} onChange={(e) => setNumber('targetMonthlyIncome', e.target.value, 0.01)} />
           </Field>
           <div className="space-y-1.5">
-            <div className="flex justify-between">
-              <Label>Реальная доходность</Label>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <Label>Реальная доходность</Label>
+                <Hint text="Доходность сверх инфляции. Все расчёты — в сегодняшней покупательной способности." />
+              </div>
               <span className="text-sm font-medium tabular-nums">{profile.expectedRealYieldPct.toFixed(1)}%</span>
             </div>
             <Slider min={1} max={10} step={0.5} value={[profile.expectedRealYieldPct]} onValueChange={([v]) => setProfile({ expectedRealYieldPct: v })} />
@@ -184,7 +195,10 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label>Уведомления</Label>
+            <div className="flex items-center gap-1">
+              <Label>Уведомления</Label>
+              <Hint text="Локальное уведомление браузера при открытии приложения, если текущий месяц не пополнен. День срабатывания настраивается ниже." />
+            </div>
             <Button
               variant="outline"
               className="w-full justify-start"

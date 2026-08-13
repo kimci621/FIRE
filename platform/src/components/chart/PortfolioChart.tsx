@@ -3,6 +3,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import { formatMoney, formatMoneyCompact } from '@/lib/finance/format'
 import { useFireData } from '@/hooks/useFireData'
 import { selectPoints } from '@/store/selectors'
+import { Hint } from '@/components/ui/hint'
 
 type Mode = 'real' | 'nominal'
 
@@ -34,7 +35,12 @@ export function PortfolioChart() {
   return (
     <section className="rounded-2xl border bg-card p-4 space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-semibold">Портфель</h2>
+        <h2 className="flex items-center gap-1 font-semibold">
+          Портфель
+          <Hint
+            text={`Слои: вклады (Emerald) и сложный процент (Violet). «Сегодняшние деньги» — реальная покупательная способность. «Номинальные» — с учётом инфляции ${profile.inflationPct}%/год, только отображение: расчёты не меняются.`}
+          />
+        </h2>
         <div className="flex rounded-lg border p-0.5">
           <button className={toggleClass(mode === 'real')} onClick={() => setMode('real')}>
             Сегодняшние деньги
