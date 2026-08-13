@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { MonthEntry } from '../types'
+import type { MonthEntry } from './types'
 import { selectStreak } from './streak'
 import { monthId } from './finance/projection'
 

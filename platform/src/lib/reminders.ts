@@ -1,4 +1,4 @@
-import type { FireData } from '../types'
+import type { FireData } from './types'
 import { formatMoney } from './finance/format'
 import { monthId } from './finance/projection'
 
