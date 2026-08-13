@@ -1,0 +1,70 @@
+export type Currency = 'USD' | 'EUR' | 'RUB'
+export type Theme = 'dark' | 'light' | 'system'
+export type AvatarType = 'emoji' | 'image'
+
+export interface Avatar {
+  type: AvatarType
+  value: string
+}
+
+export interface Profile {
+  name: string
+  avatar: Avatar
+  currency: Currency
+  currentAge: number
+  targetAge: number
+  retirementYears: number
+  initialCapital: number
+  targetMonthlyIncome: number
+  expectedRealYieldPct: number
+  inflationPct: number
+  theme: Theme
+}
+
+export interface MonthEntry {
+  id: string // "YYYY-MM"
+  year: number
+  month: number // 1-12
+  age: number
+  plannedDeposit: number
+  actualDeposit: number
+  isCompleted: boolean
+  notes?: string
+}
+
+export interface FireMeta {
+  unlockedMilestones: string[]
+}
+
+export interface FireData {
+  profile: Profile
+  months: MonthEntry[]
+  meta: FireMeta
+}
+
+export interface ProjectionPoint {
+  id: string
+  year: number
+  month: number
+  age: number
+  balance: number
+  contributions: number
+  interest: number
+  isFuture: boolean
+}
+
+export const DEFAULT_PROFILE: Profile = {
+  name: 'Амир',
+  avatar: { type: 'emoji', value: '🚀' },
+  currency: 'USD',
+  currentAge: 28,
+  targetAge: 50,
+  retirementYears: 25,
+  initialCapital: 100000,
+  targetMonthlyIncome: 5000,
+  expectedRealYieldPct: 4,
+  inflationPct: 8,
+  theme: 'dark',
+}
+
+export const DEFAULT_META: FireMeta = { unlockedMilestones: [] }
