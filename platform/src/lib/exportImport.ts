@@ -18,7 +18,7 @@ export function downloadJson(data: FireData): void {
 
 export type ImportResult = { ok: true; data: FireData } | { ok: false; error: string }
 
-const CURRENCIES: Currency[] = ['USD', 'EUR', 'RUB']
+const CURRENCIES: Currency[] = ['USD', 'EUR', 'RUB', 'GBP', 'CHF', 'CNY', 'JPY', 'KZT', 'AED', 'TRY']
 
 function isProfile(p: unknown): p is Profile {
   if (typeof p !== 'object' || p === null) return false
@@ -32,6 +32,7 @@ function isProfile(p: unknown): p is Profile {
     typeof o.targetMonthlyIncome === 'number' &&
     typeof o.expectedRealYieldPct === 'number' &&
     typeof o.inflationPct === 'number' &&
+    typeof o.catchUpMonths === 'number' &&
     CURRENCIES.includes(o.currency as Currency)
   )
 }

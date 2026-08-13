@@ -19,6 +19,7 @@ export function computeCatchUp(
   startYear: number,
   currentMonthIndex: number,
   annualYieldPct: number,
+  months: number = CATCHUP_MONTHS,
 ): CatchUpResult | null {
   let shortfall = 0
   for (const e of entries) {
@@ -29,7 +30,7 @@ export function computeCatchUp(
   }
   if (shortfall <= 0) return null
   const r = monthlyRate(annualYieldPct)
-  const raw = (shortfall * r) / (1 - Math.pow(1 + r, -CATCHUP_MONTHS))
+  const raw = (shortfall * r) / (1 - Math.pow(1 + r, -months))
   const extraPerMonth = Math.ceil(raw / 100) * 100
-  return { shortfall, extraPerMonth, months: CATCHUP_MONTHS }
+  return { shortfall, extraPerMonth, months }
 }

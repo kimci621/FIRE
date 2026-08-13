@@ -34,7 +34,13 @@ export function selectCurrentBalance(state: FireData, now: Date = new Date()): n
 }
 
 export function selectCatchUp(state: FireData, now: Date = new Date()): CatchUpResult | null {
-  return computeCatchUp(state.months, now.getFullYear(), now.getMonth(), state.profile.expectedRealYieldPct)
+  return computeCatchUp(
+    state.months,
+    now.getFullYear(),
+    now.getMonth(),
+    state.profile.expectedRealYieldPct,
+    state.profile.catchUpMonths,
+  )
 }
 
 export interface YearGroup {

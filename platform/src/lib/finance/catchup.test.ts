@@ -31,6 +31,15 @@ describe('computeCatchUp', () => {
     expect(computeCatchUp(entries, 2026, 7, 4)).toBeNull()
   })
 
+  it('respects custom horizon', () => {
+    const entries = [entry('2026-01', 1000, 0, false)]
+    const result = computeCatchUp(entries, 2026, 7, 4, 6)
+    expect(result?.months).toBe(6)
+    // при Y=6 платёж выше, чем при Y=12
+    const r12 = computeCatchUp(entries, 2026, 7, 4, 12)
+    expect(result!.extraPerMonth).toBeGreaterThan(r12!.extraPerMonth)
+  })
+
   it('treats skipped past months as full shortfall', () => {
     const entries = [entry('2026-01', 2000, 0, false)]
     const result = computeCatchUp(entries, 2026, 7, 4)

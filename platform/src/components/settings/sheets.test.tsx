@@ -14,6 +14,7 @@ describe('SettingsSheet', () => {
     expect(screen.getByLabelText('Имя')).toBeInTheDocument()
     expect(screen.getByLabelText('Текущий возраст')).toBeInTheDocument()
     expect(screen.getByLabelText('Целевой возраст')).toBeInTheDocument()
+    expect(screen.getByLabelText('Догонялки, мес')).toBeInTheDocument()
     expect(screen.getByText('Реальная доходность')).toBeInTheDocument()
   })
 

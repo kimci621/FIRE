@@ -1,4 +1,4 @@
-export type Currency = 'USD' | 'EUR' | 'RUB'
+export type Currency = 'USD' | 'EUR' | 'RUB' | 'GBP' | 'CHF' | 'CNY' | 'JPY' | 'KZT' | 'AED' | 'TRY'
 export type Theme = 'dark' | 'light' | 'system'
 export type AvatarType = 'emoji' | 'image'
 
@@ -18,6 +18,8 @@ export interface Profile {
   targetMonthlyIncome: number
   expectedRealYieldPct: number
   inflationPct: number
+  /** Горизонт «догонялок»: за сколько месяцев закрывать недобор (6-36). */
+  catchUpMonths: number
   theme: Theme
 }
 
@@ -64,6 +66,7 @@ export const DEFAULT_PROFILE: Profile = {
   targetMonthlyIncome: 5000,
   expectedRealYieldPct: 4,
   inflationPct: 8,
+  catchUpMonths: 12,
   theme: 'dark',
 }
 

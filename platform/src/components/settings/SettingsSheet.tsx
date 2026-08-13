@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import type { Currency, Profile } from '@/lib/types'
 import { useFireStore } from '@/store/useFireStore'
 
-const CURRENCIES: Currency[] = ['USD', 'EUR', 'RUB']
+const CURRENCIES: Currency[] = ['USD', 'EUR', 'RUB', 'GBP', 'CHF', 'CNY', 'JPY', 'KZT', 'AED', 'TRY']
 const EMOJIS = ['🚀', '💰', '📈', '🎯', '🔥', '💎']
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: ReactNode }) {
@@ -25,7 +25,14 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
   const [error, setError] = useState<string | null>(null)
 
   const setNumber = (
-    field: 'currentAge' | 'targetAge' | 'retirementYears' | 'initialCapital' | 'targetMonthlyIncome' | 'inflationPct',
+    field:
+      | 'currentAge'
+      | 'targetAge'
+      | 'retirementYears'
+      | 'initialCapital'
+      | 'targetMonthlyIncome'
+      | 'inflationPct'
+      | 'catchUpMonths',
     value: string,
     min: number,
   ) => {
@@ -41,6 +48,10 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
     }
     if (field === 'currentAge' && n >= profile.targetAge) {
       setError('Текущий возраст должен быть меньше целевого')
+      return
+    }
+    if (field === 'catchUpMonths' && n > 36) {
+      setError('Горизонт догонялок — не более 36 месяцев')
       return
     }
     setError(null)
@@ -77,12 +88,12 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
           </div>
           <div className="space-y-1.5">
             <Label>Валюта</Label>
-            <div className="flex rounded-lg border p-0.5">
+            <div className="grid grid-cols-5 gap-1 rounded-lg border p-0.5">
               {CURRENCIES.map((c) => (
                 <button
                   key={c}
                   className={cn(
-                    'flex-1 rounded-md px-2 py-1.5 text-sm transition-colors',
+                    'rounded-md px-1 py-1.5 text-xs transition-colors',
                     profile.currency === c ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
                   )}
                   onClick={() => setProfile({ currency: c })}
@@ -105,6 +116,9 @@ export function SettingsSheet({ open, onOpenChange }: { open: boolean; onOpenCha
             </Field>
             <Field label="Инфляция, %" htmlFor="inflation">
               <Input id="inflation" type="number" inputMode="decimal" value={profile.inflationPct} onChange={(e) => setNumber('inflationPct', e.target.value, 0)} />
+            </Field>
+            <Field label="Догонялки, мес" htmlFor="catchup-months">
+              <Input id="catchup-months" type="number" inputMode="numeric" value={profile.catchUpMonths} onChange={(e) => setNumber('catchUpMonths', e.target.value, 6)} />
             </Field>
           </div>
           <Field label="Стартовый капитал" htmlFor="initial-capital">
