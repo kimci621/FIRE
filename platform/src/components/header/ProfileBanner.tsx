@@ -19,6 +19,8 @@ export function ProfileBanner() {
   const streak = useMemo(() => selectStreak(data.months), [data.months])
   const currentBalance = useMemo(() => selectCurrentBalance(data), [data])
   const progressPct = targetCapital > 0 ? Math.round((currentBalance / targetCapital) * 100) : 0
+  const barPct = Math.min(100, progressPct)
+  const remaining = Math.max(0, targetCapital - currentBalance)
 
   return (
     <section className="rounded-2xl border bg-card p-4 space-y-4">
@@ -59,6 +61,25 @@ export function ProfileBanner() {
         <div className="text-sm text-muted-foreground">
           Базовый взнос:{' '}
           <span className="font-medium text-foreground">{formatMoney(required, profile.currency)}/мес</span>
+        </div>
+        <div className="space-y-1.5">
+          <div
+            role="progressbar"
+            aria-label="Прогресс к цели"
+            aria-valuenow={barPct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            className="h-2 w-full overflow-hidden rounded-full bg-muted"
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-violet-500 transition-all duration-500"
+              style={{ width: `${barPct}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-xs tabular-nums text-muted-foreground">
+            <span>Накоплено {formatMoney(currentBalance, profile.currency)}</span>
+            <span>Осталось {formatMoney(remaining, profile.currency)}</span>
+          </div>
         </div>
         <div className="text-sm text-muted-foreground">
           Изъятие после {profile.targetAge} лет:{' '}
