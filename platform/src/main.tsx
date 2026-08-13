@@ -1,5 +1,8 @@
+import { registerSW } from 'virtual:pwa-register'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+
+registerSW({ immediate: true })
 import App from './App'
 import './index.css'
 
