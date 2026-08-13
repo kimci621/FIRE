@@ -4,3 +4,5 @@ dev-dist
 test-results
 playwright-report
 *.tsbuildinfo
+.env
+.env.local
