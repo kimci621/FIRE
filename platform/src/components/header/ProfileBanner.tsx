@@ -36,6 +36,11 @@ export function ProfileBanner() {
           Базовый взнос:{' '}
           <span className="font-medium text-foreground">{formatMoney(required, profile.currency)}/мес</span>
         </div>
+        <div className="text-sm text-muted-foreground">
+          Изъятие после {profile.targetAge} лет:{' '}
+          <span className="font-medium text-foreground">{formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес</span>{' '}
+          · {profile.retirementYears} лет выплат
+        </div>
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
