@@ -25,6 +25,7 @@ export function DataSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
   const syncNow = useFireStore((s) => s.syncNow)
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
+  const [sending, setSending] = useState(false)
   const loggedIn = sync.status === 'synced' || sync.status === 'syncing'
   const fileRef = useRef<HTMLInputElement>(null)
   const parsedRef = useRef<FireData | null>(null)
@@ -110,9 +111,19 @@ export function DataSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                     </div>
                   )}
                   {!sync.email && (
-                    <Button className="w-full" onClick={() => void sendCode(email)}>
-                      Получить код
+                    <Button
+                      className="w-full"
+                      disabled={sending || !email.includes('@')}
+                      onClick={() => {
+                        setSending(true)
+                        void sendCode(email).finally(() => setSending(false))
+                      }}
+                    >
+                      {sending ? 'Отправка…' : 'Получить код'}
                     </Button>
+                  )}
+                  {sync.email && !sending && (
+                    <p className="text-xs text-muted-foreground">Код отправлен на {sync.email}. Если письма нет — подождите минуту, лимит писем ограничен.</p>
                   )}
                 </div>
               )}
