@@ -4,12 +4,21 @@ import { selectYearGroups } from '@/store/selectors'
 import { Hint } from '@/components/ui/hint'
 import { monthId } from '@/lib/finance/projection'
 import { MonthRow } from './MonthRow'
+import { MonthDialog } from './MonthDialog'
 
 export function Calendar() {
   const data = useFireData()
   const groups = useMemo(() => selectYearGroups(data), [data])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const selected = useMemo(() => {
+    if (!selectedId) return null
+    for (const g of groups) {
+      const found = g.entries.find((e) => e.point.id === selectedId)
+      if (found) return found
+    }
+    return null
+  }, [selectedId, groups])
   const currentId = monthId(new Date().getFullYear(), new Date().getMonth() + 1)
 
   // при открытии сайта — активный месяц по центру контейнера
@@ -42,7 +51,7 @@ export function Calendar() {
           item.type === 'header' ? (
             <div
               key={item.key}
-              className="sticky top-0 z-10 -mx-2 mb-1 bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur"
+              className="sticky -top-2 z-10 -mx-2 mb-1 border-b border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground"
             >
               {item.year} — {item.age} лет
             </div>
@@ -51,13 +60,17 @@ export function Calendar() {
               key={item.key}
               point={item.point}
               entry={item.entry}
-              expanded={selectedId === item.point.id}
-              onSelect={() => setSelectedId(selectedId === item.point.id ? null : item.point.id)}
-              onClose={() => setSelectedId(null)}
+              onSelect={() => setSelectedId(item.point.id)}
             />
           ),
         )}
       </div>
+      <MonthDialog
+        open={selected !== null}
+        onOpenChange={(o) => !o && setSelectedId(null)}
+        point={selected?.point ?? null}
+        entry={selected?.entry}
+      />
     </section>
   )
 }
