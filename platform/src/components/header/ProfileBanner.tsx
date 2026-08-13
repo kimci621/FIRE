@@ -93,11 +93,28 @@ export function ProfileBanner() {
           className="text-3xl font-bold tabular-nums tracking-tight"
         />
         </div>
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          Базовый взнос:{' '}
-          <span className="font-medium text-foreground">{formatMoney(required, profile.currency)}/мес</span>
-          <Hint
-            text={`PMT-формула: ежемесячный взнос, доводящий стартовый капитал ${formatMoney(profile.initialCapital, profile.currency)} до цели за ${(profile.targetAge - profile.currentAge) * 12} мес при ${profile.expectedRealYieldPct.toFixed(1)}% реальной доходности. Пересчитывается при каждом изменении параметров.`}
+        <div className="grid grid-cols-2 gap-2">
+          <StatTile
+            label="Базовый взнос"
+            hint={`PMT-формула: ежемесячный взнос, доводящий стартовый капитал ${formatMoney(profile.initialCapital, profile.currency)} до цели за ${(profile.targetAge - profile.currentAge) * 12} мес при ${profile.expectedRealYieldPct.toFixed(1)}% реальной доходности.`}
+            value={`${formatMoney(required, profile.currency)}/мес`}
+            caption="пересчитывается live"
+          />
+          <StatTile
+            label={`Изъятие после ${profile.targetAge}`}
+            hint="Сумма ежемесячного изъятия в сегодняшних деньгах. Капитал продолжает инвестироваться — проценты покрывают часть изъятий."
+            value={`${formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес`}
+            caption={`${profile.retirementYears} лет выплат`}
+          />
+          <StatTile
+            label="Срок накоплений"
+            hint="От текущего до целевого возраста включительно — столько месяцев работает сложный процент."
+            value={`${profile.targetAge - profile.currentAge} лет · ${(profile.targetAge - profile.currentAge) * 12} мес`}
+          />
+          <StatTile
+            label="Стартовый капитал"
+            hint="Уже накопленная сумма на старте. Входит в «Накоплено сейчас» и уменьшает базовый взнос."
+            value={formatMoney(profile.initialCapital, profile.currency)}
           />
         </div>
         <div className="space-y-1.5">
@@ -118,12 +135,6 @@ export function ProfileBanner() {
             <span>Накоплено {formatMoney(currentBalance, profile.currency)}</span>
             <span>Осталось {formatMoney(remaining, profile.currency)}</span>
           </div>
-        </div>
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          Изъятие после {profile.targetAge} лет:{' '}
-          <span className="font-medium text-foreground">{formatMoney(profile.targetMonthlyIncome, profile.currency)}/мес</span>{' '}
-          · {profile.retirementYears} лет выплат
-          <Hint text="Сумма ежемесячного изъятия в сегодняшних деньгах. Капитал продолжает инвестироваться — проценты покрывают часть изъятий, поэтому суммы хватает на весь срок." />
         </div>
         <p className="text-xs text-muted-foreground/80">
           Капитал продолжает инвестироваться под {profile.expectedRealYieldPct.toFixed(1)}% реальной доходности и
