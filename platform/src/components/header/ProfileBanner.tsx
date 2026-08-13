@@ -1,8 +1,11 @@
+import { useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { formatMoney } from '@/lib/finance/format'
 import { useFireStore } from '@/store/useFireStore'
+import { useFireData } from '@/hooks/useFireData'
 import { selectRequiredDeposit, selectTargetCapital } from '@/store/selectors'
+import { selectStreak } from '@/lib/streak'
 import { AnimatedMoney } from './AnimatedMoney'
 
 const PRESETS = [2, 4, 6]
@@ -10,8 +13,10 @@ const PRESETS = [2, 4, 6]
 export function ProfileBanner() {
   const profile = useFireStore((s) => s.profile)
   const setProfile = useFireStore((s) => s.setProfile)
+  const data = useFireData()
   const targetCapital = selectTargetCapital(profile)
   const required = selectRequiredDeposit(profile)
+  const streak = useMemo(() => selectStreak(data.months), [data.months])
 
   return (
     <section className="rounded-2xl border bg-card p-4 space-y-4">
@@ -24,6 +29,7 @@ export function ProfileBanner() {
           <div className="text-sm text-muted-foreground">
             Путь к {profile.targetAge} годам · {profile.currency}
           </div>
+          <div className="text-sm text-muted-foreground">🔥 {streak} мес. подряд</div>
         </div>
       </div>
       <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-violet-500/10 p-4">
