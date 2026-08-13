@@ -6,6 +6,7 @@ import { formatMoneyCompact } from '@/lib/finance/format'
 import type { YearGroup } from '@/store/selectors'
 import { useFireStore } from '@/store/useFireStore'
 import { MonthCard } from './MonthCard'
+import { celebrateDeposit } from '@/lib/celebrate'
 
 export function YearSection({ group, defaultOpen }: { group: YearGroup; defaultOpen: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -40,7 +41,13 @@ export function YearSection({ group, defaultOpen }: { group: YearGroup; defaultO
                   point={point}
                   entry={entry}
                   currency={currency}
-                  onToggle={() => toggleMonthCompleted(point.id)}
+                  onToggle={(e) => {
+                    const completing = !entry?.isCompleted
+                    toggleMonthCompleted(point.id)
+                    if (completing) {
+                      celebrateDeposit(e.clientX / window.innerWidth, e.clientY / window.innerHeight)
+                    }
+                  }}
                   onActual={(v) => setMonthActual(point.id, v)}
                 />
               ))}

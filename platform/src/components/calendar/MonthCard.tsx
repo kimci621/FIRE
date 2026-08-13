@@ -11,7 +11,7 @@ interface MonthCardProps {
   point: ProjectionPoint
   entry: MonthEntry | undefined
   currency: Currency
-  onToggle: () => void
+  onToggle: (e: React.MouseEvent<HTMLButtonElement>) => void
   onActual: (value: number) => void
 }
 

@@ -10,8 +10,8 @@ beforeEach(() => {
 describe('BadgesDialog', () => {
   it('lists all milestones with progress', () => {
     render(<BadgesDialog open onOpenChange={() => {}} />)
-    // 5 ачивок: 4 фиксированные + финальная
-    expect(screen.getAllByRole('progressbar')).toHaveLength(5)
+    // 21 ачивка: лесенка каждые 500k до 10M + финал
+    expect(screen.getAllByRole('progressbar')).toHaveLength(21)
     expect(screen.getByText('Первые полмиллиона!')).toBeInTheDocument()
     expect(screen.getByText('ФИНАЛ!')).toBeInTheDocument()
   })
