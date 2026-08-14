@@ -97,10 +97,12 @@
   }
   html {
     -webkit-tap-highlight-color: transparent;
+    overflow-x: clip;
   }
   body {
     @apply bg-background text-foreground antialiased;
     overscroll-behavior-y: none;
+    overflow-x: clip;
   }
   /* Курсоры по контексту: pointer на кликабельном, text на вводе */
   button:not(:disabled),

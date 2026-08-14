@@ -1,3 +1,7 @@
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useFireStore } from '@/store/useFireStore'
 
 const TIPS = [
@@ -41,34 +45,54 @@ const TIPS = [
 export function InvestTips() {
   const currency = useFireStore((s) => s.profile.currency)
   const yieldPct = useFireStore((s) => s.profile.expectedRealYieldPct)
+  const [open, setOpen] = useState(false)
 
   return (
     <section className="rounded-2xl border bg-card p-4 space-y-3">
-      <div>
-        <h2 className="font-semibold">Реальная доходность {yieldPct.toFixed(1)}% — как её получить</h2>
-        <p className="text-xs text-muted-foreground">
-          Общие принципы из открытых источников. Инструменты и цифры — для информации, в {currency} вкладываться не обязательно.
-        </p>
-      </div>
-      <div className="space-y-2">
-        {TIPS.map((tip) => (
-          <div key={tip.title} className="rounded-lg border bg-background/60 p-3 space-y-1">
-            <div className="flex items-center gap-2">
-              <span aria-hidden className="text-lg">
-                {tip.emoji}
-              </span>
-              <span className="text-sm font-medium">{tip.title}</span>
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-2 text-left"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <div className="min-w-0">
+          <h2 className="truncate font-semibold">Реальная доходность {yieldPct.toFixed(1)}% — как её получить</h2>
+          <p className="text-xs text-muted-foreground">
+            {TIPS.length} принципов из открытых источников · в {currency} вкладываться не обязательно
+          </p>
+        </div>
+        <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-2">
+              {TIPS.map((tip) => (
+                <div key={tip.title} className="rounded-lg border bg-background/60 p-3 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span aria-hidden className="text-lg">
+                      {tip.emoji}
+                    </span>
+                    <span className="text-sm font-medium">{tip.title}</span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{tip.text}</p>
+                  <p className="text-[10px] text-muted-foreground/70">Источник: {tip.source}</p>
+                </div>
+              ))}
             </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">{tip.text}</p>
-            <p className="text-[10px] text-muted-foreground/70">Источник: {tip.source}</p>
-          </div>
-        ))}
-      </div>
-      <p className="text-[10px] leading-relaxed text-muted-foreground/80">
-        ⚠️ Не является индивидуальной инвестиционной рекомендацией и не призыв к действиям (ст. 6.1–6.2 ФЗ № 39-ФЗ
-        «О рынке ценных бумаг»). Материал носит исключительно информационный характер. Прошлая доходность и прогнозы
-        не гарантируют будущих результатов.
-      </p>
+            <p className="pt-2 text-[10px] leading-relaxed text-muted-foreground/80">
+              ⚠️ Не является индивидуальной инвестиционной рекомендацией и не призыв к действиям (ст. 6.1–6.2 ФЗ № 39-ФЗ
+              «О рынке ценных бумаг»). Материал носит исключительно информационный характер. Прошлая доходность и
+              прогнозы не гарантируют будущих результатов.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
