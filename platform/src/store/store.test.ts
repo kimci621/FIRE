@@ -37,7 +37,7 @@ describe('selectors', () => {
   it('computes catch-up from past months', () => {
     const result = selectCatchUp(useFireStore.getState(), NOW)
     // Feb: 600 недобора + Mar..Jul созданы importData с планом required и фактом 0 (пропущены)
-    const required = selectRequiredDeposit(useFireStore.getState().profile)
+    const required = Math.round(selectRequiredDeposit(useFireStore.getState().profile) * 100) / 100
     expect(result?.shortfall).toBeCloseTo(600 + 5 * required, 5)
   })
 
@@ -59,15 +59,24 @@ describe('actions', () => {
     const future = months.find((m) => m.id === '2027-01')
     expect(past?.plannedDeposit).toBe(1000) // снапшот не тронут
     expect(future?.plannedDeposit).not.toBe(1000)
-    expect(future?.plannedDeposit).toBeCloseTo(selectRequiredDeposit(useFireStore.getState().profile), 5)
+    const rounded = Math.round(selectRequiredDeposit(useFireStore.getState().profile) * 100) / 100
+    expect(future?.plannedDeposit).toBeCloseTo(rounded, 5)
   })
 
-  it('toggleMonthCompleted sets actual to planned when zero', () => {
-    // 2026-03 создан importData: не completed, actual 0, planned = required
-    useFireStore.getState().toggleMonthCompleted('2026-03')
+  it('toggleMonthCompleted blocks completing when actual is zero', () => {
+    // 2026-03 создан importData: не completed, actual 0 — отметить нельзя
+    useFireStore.getState().toggleMonthCompleted('2026-03', NOW)
+    expect(useFireStore.getState().months.find((x) => x.id === '2026-03')?.isCompleted).toBe(false)
+  })
+
+  it('toggleMonthCompleted toggles when actual is positive and never auto-fills', () => {
+    useFireStore.getState().setMonthActual('2026-03', 500, NOW)
+    useFireStore.getState().toggleMonthCompleted('2026-03', NOW)
     const m = useFireStore.getState().months.find((x) => x.id === '2026-03')
     expect(m?.isCompleted).toBe(true)
-    expect(m?.actualDeposit).toBeCloseTo(selectRequiredDeposit(useFireStore.getState().profile), 5)
+    expect(m?.actualDeposit).toBe(500) // без автоподстановки плана
+    useFireStore.getState().toggleMonthCompleted('2026-03', NOW)
+    expect(useFireStore.getState().months.find((x) => x.id === '2026-03')?.isCompleted).toBe(false)
   })
 
   it('setMonthCustom sets and clears custom deposit', () => {

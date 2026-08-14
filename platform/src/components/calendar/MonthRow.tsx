@@ -5,7 +5,7 @@ import { celebrateDeposit } from '@/lib/celebrate'
 import type { Currency, MonthEntry, ProjectionPoint } from '@/lib/types'
 import { useFireStore } from '@/store/useFireStore'
 
-export const MONTH_NAMES = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
+export const MONTH_NAMES = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
 
 interface MonthRowProps {
   point: ProjectionPoint
@@ -19,6 +19,8 @@ export function MonthRow({ point, entry, onSelect }: MonthRowProps) {
 
   const done = entry?.isCompleted ?? false
   const skipped = !point.isFuture && !done
+  const actual = entry?.actualDeposit ?? 0
+  const canToggle = done || actual > 0
 
   return (
     <div
@@ -33,16 +35,20 @@ export function MonthRow({ point, entry, onSelect }: MonthRowProps) {
     >
       <div className="flex min-w-0 items-center gap-2">
         <button
-          aria-label={done ? 'Снять отметку' : 'Отметил пополнение'}
+          aria-label={done ? 'Снять отметку' : actual > 0 ? 'Отметил пополнение' : 'Указать взнос'}
           onClick={(e) => {
             e.stopPropagation()
+            if (!canToggle) {
+              onSelect()
+              return
+            }
             const completing = !done
             toggleMonthCompleted(point.id)
             if (completing) celebrateDeposit(e.clientX / window.innerWidth, e.clientY / window.innerHeight)
           }}
           className={cn(
             'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors',
-            done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-muted-foreground/40 text-transparent',
+            done ? 'border-emerald-500 bg-emerald-500 text-white' : actual > 0 ? 'border-muted-foreground/40 text-transparent' : 'border-dashed border-muted-foreground/50 text-muted-foreground/50',
           )}
         >
           <Check className="h-3.5 w-3.5" />

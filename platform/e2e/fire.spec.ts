@@ -17,9 +17,12 @@ test('data sheet shows auth form', async ({ page }) => {
 
 test('marking current month as completed shows check state', async ({ page }) => {
   await page.goto('/')
-  const toggle = page.getByRole('button', { name: 'Отметил пополнение' }).first()
-  await toggle.click()
-  await expect(page.getByRole('button', { name: 'Снять отметку' }).first()).toBeVisible()
+  const now = new Date()
+  const id = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  await page.locator(`[data-month-id="${id}"]`).click()
+  await page.getByLabel('Фактический взнос (если пополнили заранее)').fill('5000')
+  await page.getByRole('button', { name: 'Отметил пополнение' }).click()
+  await expect(page.getByRole('button', { name: 'Снять отметку' })).toBeVisible()
 })
 
 test('export → reset → import roundtrip', async ({ page }) => {

@@ -61,8 +61,8 @@ describe('Calendar', () => {
 })
 
 describe('MonthRow', () => {
-  it('toggles month via circle button', () => {
-    useFireStore.getState().setMonthActual('2026-01', 0)
+  it('toggles month via circle button when actual is positive', () => {
+    useFireStore.getState().setMonthActual('2026-01', 1000)
     useFireStore.getState().toggleMonthCompleted('2026-01')
     expect(useFireStore.getState().months.find((m) => m.id === '2026-01')?.isCompleted).toBe(true)
     render(<MonthRow point={point} entry={entry} onSelect={vi.fn()} />)
@@ -70,20 +70,39 @@ describe('MonthRow', () => {
     expect(useFireStore.getState().months.find((m) => m.id === '2026-01')?.isCompleted).toBe(false)
   })
 
+  it('opens modal instead of toggling when actual is zero', () => {
+    const onSelect = vi.fn()
+    render(<MonthRow point={{ ...point }} entry={{ ...entry, actualDeposit: 0, isCompleted: false }} onSelect={onSelect} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Указать взнос' }))
+    expect(onSelect).toHaveBeenCalled()
+    expect(useFireStore.getState().months.find((m) => m.id === '2026-01')?.isCompleted).toBe(false)
+  })
+
   it('calls onSelect on row click', () => {
     const onSelect = vi.fn()
     render(<MonthRow point={point} entry={entry} onSelect={onSelect} />)
-    fireEvent.click(screen.getByText('Янв 2026'))
+    fireEvent.click(screen.getByText('Январь 2026'))
     expect(onSelect).toHaveBeenCalled()
   })
 })
 
 describe('MonthDialog', () => {
-  it('shows actual input for past month and plan rows', () => {
+  it('shows actual input for past month and plan rows, no close button', () => {
     render(<MonthDialog open onOpenChange={vi.fn()} point={point} entry={entry} />)
     expect(screen.getByLabelText('Фактический взнос')).toBeInTheDocument()
     expect(screen.getByText('Итог портфеля на конец месяца')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Готово' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Готово' })).not.toBeInTheDocument()
+  })
+
+  it('disables completing with zero actual and enables after input', () => {
+    const zeroEntry: MonthEntry = { ...entry, actualDeposit: 0, isCompleted: false }
+    const { rerender } = render(<MonthDialog open onOpenChange={vi.fn()} point={point} entry={zeroEntry} />)
+    expect(screen.getByRole('button', { name: 'Отметил пополнение' })).toBeDisabled()
+    const input = screen.getByLabelText('Фактический взнос')
+    fireEvent.input(input, { target: { value: '500' } })
+    const storeEntry = useFireStore.getState().months.find((m) => m.id === '2026-01')
+    rerender(<MonthDialog open onOpenChange={vi.fn()} point={point} entry={storeEntry} />)
+    expect(screen.getByRole('button', { name: 'Отметил пополнение' })).not.toBeDisabled()
   })
 
   it('shows custom deposit input for future month', () => {
@@ -108,7 +127,9 @@ describe('MonthDialog', () => {
 })
 
 describe('MONTH_NAMES', () => {
-  it('has 12 months', () => {
+  it('has 12 full month names', () => {
     expect(MONTH_NAMES).toHaveLength(12)
+    expect(MONTH_NAMES[0]).toBe('Январь')
+    expect(MONTH_NAMES[11]).toBe('Декабрь')
   })
 })

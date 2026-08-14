@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -24,6 +24,8 @@ export function MonthDialog({ open, onOpenChange, point, entry }: MonthDialogPro
 
   if (!point) return null
   const done = entry?.isCompleted ?? false
+  const actual = entry?.actualDeposit ?? 0
+  const canComplete = !done && actual > 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,36 +39,21 @@ export function MonthDialog({ open, onOpenChange, point, entry }: MonthDialogPro
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <Button
-            className={cn('w-full', done && 'bg-emerald-600 text-white hover:bg-emerald-700')}
-            variant={done ? 'default' : 'outline'}
-            onClick={() => {
-              const completing = !done
-              toggleMonthCompleted(point.id)
-              if (completing) celebrateDeposit(0.5, 0.55)
-            }}
-          >
-            {done && <Check className="mr-2 h-4 w-4" />}
-            {done ? 'Снять отметку' : 'Отметил пополнение'}
-          </Button>
-
-          {!point.isFuture && (
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground" htmlFor={`actual-${point.id}`}>
-                Фактический взнос
-              </label>
-              <Input
-                id={`actual-${point.id}`}
-                type="number"
-                inputMode="decimal"
-                min={0}
-                value={entry?.actualDeposit || ''}
-                placeholder="0"
-                onChange={(e) => setMonthActual(point.id, Number(e.target.value))}
-                className="h-9"
-              />
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground" htmlFor={`actual-${point.id}`}>
+              {point.isFuture ? 'Фактический взнос (если пополнили заранее)' : 'Фактический взнос'}
+            </label>
+            <Input
+              id={`actual-${point.id}`}
+              type="number"
+              inputMode="decimal"
+              min={0}
+              value={entry?.actualDeposit || ''}
+              placeholder="0"
+              onChange={(e) => setMonthActual(point.id, Number(e.target.value))}
+              className="h-9"
+            />
+          </div>
 
           {point.isFuture && (
             <div className="space-y-1.5">
@@ -105,10 +92,27 @@ export function MonthDialog({ open, onOpenChange, point, entry }: MonthDialogPro
             </div>
           </div>
 
-          <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
-            Готово
-          </Button>
+          {canComplete && (
+            <p className="text-xs text-muted-foreground/80">
+              Отметить месяц как пополненный можно только с взносом больше 0.
+            </p>
+          )}
         </div>
+        <DialogFooter>
+          <Button
+            className={cn('w-full sm:w-full', done && 'bg-emerald-600 text-white hover:bg-emerald-700')}
+            variant={done ? 'default' : 'outline'}
+            disabled={!done && actual <= 0}
+            onClick={() => {
+              const completing = !done
+              toggleMonthCompleted(point.id)
+              if (completing) celebrateDeposit(0.5, 0.55)
+            }}
+          >
+            {done && <Check className="mr-2 h-4 w-4" />}
+            {done ? 'Снять отметку' : 'Отметил пополнение'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

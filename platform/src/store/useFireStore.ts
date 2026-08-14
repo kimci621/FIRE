@@ -67,12 +67,14 @@ function regenerateMonths(profile: Profile, prevMonths: MonthEntry[], now: Date)
   if (totalMonths <= 0) return prevMonths
   const startYear = now.getFullYear()
   const currentMonthIndex = now.getMonth()
-  const required = requiredMonthlyDeposit(
-    selectTargetCapital(profile),
-    profile.initialCapital,
-    totalMonths,
-    profile.expectedRealYieldPct,
-  )
+  const required = Math.round(
+    requiredMonthlyDeposit(
+      selectTargetCapital(profile),
+      profile.initialCapital,
+      totalMonths,
+      profile.expectedRealYieldPct,
+    ) * 100,
+  ) / 100
   const byId = new Map(prevMonths.map((m) => [m.id, m]))
   const months: MonthEntry[] = []
   for (let i = 0; i < totalMonths; i++) {
@@ -125,19 +127,16 @@ export const useFireStore = create<FireStoreState>()(
         scheduleAutoSync()
       },
       toggleMonthCompleted(id, now = new Date()) {
-        set((state) => ({
-          months: state.months.map((m) =>
-            m.id === id
-              ? {
-                  ...m,
-                  isCompleted: !m.isCompleted,
-                  actualDeposit:
-                    !m.isCompleted && m.actualDeposit <= 0 ? (m.customDeposit ?? m.plannedDeposit) : m.actualDeposit,
-                }
-              : m,
-          ),
-          meta: bumpMonth(state.meta, id, now),
-        }))
+        set((state) => {
+          const month = state.months.find((m) => m.id === id)
+          if (!month) return state
+          // Нельзя отметить месяц как пополненный с нулевым взносом
+          if (!month.isCompleted && month.actualDeposit <= 0) return state
+          return {
+            months: state.months.map((m) => (m.id === id ? { ...m, isCompleted: !m.isCompleted } : m)),
+            meta: bumpMonth(state.meta, id, now),
+          }
+        })
         scheduleAutoSync()
       },
       setMonthActual(id, value, now = new Date()) {
